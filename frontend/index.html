@@ -16,21 +16,15 @@
 
     <main class="app">
 
-        <!-- =========================
-             WELCOME SCREEN
-        ========================== -->
+        <!-- welcome -->
 
         <section id="welcomeScreen" class="screen">
 
             <div class="hero">
 
-                <div class="crest">
-                    ⚔
-                </div>
+                <div class="crest">⚔</div>
 
-                <p class="eyebrow">
-                    CSCC • WELCOME DAY
-                </p>
+                <p class="eyebrow">CSCC • WELCOME DAY</p>
 
                 <h1>
                     TREASURE
@@ -49,16 +43,11 @@
 
             </div>
 
-
             <div class="card start-card">
 
-                <div class="card-symbol">
-                    ◈
-                </div>
+                <div class="card-symbol">◈</div>
 
-                <h2>
-                    Enter the Hunt
-                </h2>
+                <h2>Enter the Hunt</h2>
 
                 <p>
                     Every hunter gets a different path.
@@ -88,48 +77,33 @@
         </section>
 
 
-        <!-- =========================
-             GAME SCREEN
-        ========================== -->
+        <!-- game -->
 
         <section id="gameScreen" class="screen hidden">
 
             <header class="game-header">
 
                 <div class="player-info">
-
                     <span>HUNTER</span>
-
-                    <strong id="displayName">
-                        Player
-                    </strong>
-
+                    <strong id="displayName">Player</strong>
                 </div>
 
                 <div class="score-info">
-
                     <span>HONOR</span>
-
                     <strong>
                         <b id="score">0</b>
                         <small>PTS</small>
                     </strong>
-
                 </div>
 
             </header>
 
-
             <div class="progress-line">
-
                 <div id="progressBar"></div>
-
             </div>
 
 
-            <!-- CHALLENGE -->
-
-            <div id="challengeCard" class="card challenge-card">
+            <div class="card challenge-card">
 
                 <div class="challenge-header">
 
@@ -137,29 +111,22 @@
                         SCROLL OF KNOWLEDGE
                     </span>
 
-                    <span id="questionNumber">
-                        1 / 5
-                    </span>
+                    <span id="questionNumber">1 / 5</span>
 
                 </div>
 
-                <div class="question-mark">
-                    ?
-                </div>
+                <div class="question-mark">?</div>
 
                 <h2 id="question">
                     Question goes here
                 </h2>
 
-                <div id="answers" class="answers">
-                </div>
+                <div id="answers" class="answers"></div>
 
                 <div id="feedback" class="feedback"></div>
 
             </div>
 
-
-            <!-- CLUE -->
 
             <div id="clueCard" class="card clue-card hidden">
 
@@ -173,9 +140,7 @@
                         Your path continues...
                     </p>
 
-                    <p id="clueText">
-                        Your clue appears here.
-                    </p>
+                    <p id="clueText"></p>
 
                 </div>
 
@@ -187,21 +152,15 @@
             </div>
 
 
-            <!-- QR -->
-
             <div id="qrCard" class="card qr-card hidden">
 
                 <div class="section-label">
                     CHECKPOINT
                 </div>
 
-                <div class="qr-icon">
-                    ⌗
-                </div>
+                <div class="qr-icon">⌗</div>
 
-                <h2>
-                    Find the hidden mark
-                </h2>
+                <h2>Find the hidden mark</h2>
 
                 <p>
                     Follow your clue and find the QR
@@ -217,29 +176,20 @@
             </div>
 
 
-            <button
-                id="nextButton"
-                class="next-button hidden"
-            >
+            <button id="nextButton" class="next-button hidden">
                 CONTINUE THE HUNT →
             </button>
 
         </section>
 
 
-        <!-- =========================
-             END SCREEN
-        ========================== -->
+        <!-- end -->
 
         <section id="endScreen" class="screen hidden">
 
-            <div class="end-crest">
-                ⚔
-            </div>
+            <div class="end-crest">⚔</div>
 
-            <p class="eyebrow">
-                HUNT COMPLETE
-            </p>
+            <p class="eyebrow">HUNT COMPLETE</p>
 
             <h1>
                 WELL FOUGHT,
@@ -252,24 +202,15 @@
 
             <div class="card result-card">
 
-                <p>
-                    Final honor
-                </p>
+                <p>Final honor</p>
 
-                <strong id="finalScore">
-                    0
-                </strong>
+                <strong id="finalScore">0</strong>
 
-                <span>
-                    POINTS
-                </span>
+                <span>POINTS</span>
 
                 <p id="finalMessage" class="final-message"></p>
 
-                <button
-                    id="restartButton"
-                    class="main-button"
-                >
+                <button id="restartButton" class="main-button">
                     HUNT AGAIN
                 </button>
 
@@ -282,8 +223,7 @@
                     HALL OF HUNTERS
                 </div>
 
-                <div id="leaderboard">
-                </div>
+                <div id="leaderboard"></div>
 
             </div>
 
