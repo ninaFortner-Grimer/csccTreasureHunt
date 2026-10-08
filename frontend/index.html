@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,38 +12,287 @@
 
 <body>
 
-    <main class="container">
+    <div class="background-glow"></div>
 
-        <h1>🏴‍☠️ CSCC Treasure Hunt</h1>
+    <main class="app">
 
-        <p class="subtitle">
-            Solve. Search. Scan. Score.
-        </p>
+        <!-- =========================
+             WELCOME SCREEN
+        ========================== -->
 
-        <div class="game-card">
+        <section id="welcomeScreen" class="screen">
 
-            <h2>Ready to hunt?</h2>
+            <div class="hero">
 
-            <p>
-                Solve challenges, follow clues,
-                find hidden QR codes and collect points!
+                <div class="crest">
+                    ⚔
+                </div>
+
+                <p class="eyebrow">
+                    CSCC • WELCOME DAY
+                </p>
+
+                <h1>
+                    TREASURE
+                    <span>HUNT</span>
+                </h1>
+
+                <div class="divider">
+                    <span>✦</span>
+                </div>
+
+                <p class="subtitle">
+                    Solve the challenge.<br>
+                    Follow the clue.<br>
+                    Find the treasure.
+                </p>
+
+            </div>
+
+
+            <div class="card start-card">
+
+                <div class="card-symbol">
+                    ◈
+                </div>
+
+                <h2>
+                    Enter the Hunt
+                </h2>
+
+                <p>
+                    Every hunter gets a different path.
+                    Think carefully. Move quickly.
+                </p>
+
+                <input
+                    type="text"
+                    id="playerName"
+                    placeholder="Your nickname"
+                    maxlength="20"
+                >
+
+                <button id="startButton" class="main-button">
+                    BEGIN THE HUNT
+                    <span>→</span>
+                </button>
+
+                <p id="startError" class="error"></p>
+
+            </div>
+
+            <p class="bottom-note">
+                Solve • Search • Scan • Score
             </p>
 
-            <input
-                type="text"
-                id="playerName"
-                placeholder="Enter your nickname"
-            >
+        </section>
 
-            <button id="startButton">
-                Start Hunt 🚀
+
+        <!-- =========================
+             GAME SCREEN
+        ========================== -->
+
+        <section id="gameScreen" class="screen hidden">
+
+            <header class="game-header">
+
+                <div class="player-info">
+
+                    <span>HUNTER</span>
+
+                    <strong id="displayName">
+                        Player
+                    </strong>
+
+                </div>
+
+                <div class="score-info">
+
+                    <span>HONOR</span>
+
+                    <strong>
+                        <b id="score">0</b>
+                        <small>PTS</small>
+                    </strong>
+
+                </div>
+
+            </header>
+
+
+            <div class="progress-line">
+
+                <div id="progressBar"></div>
+
+            </div>
+
+
+            <!-- CHALLENGE -->
+
+            <div id="challengeCard" class="card challenge-card">
+
+                <div class="challenge-header">
+
+                    <span class="section-label">
+                        SCROLL OF KNOWLEDGE
+                    </span>
+
+                    <span id="questionNumber">
+                        1 / 5
+                    </span>
+
+                </div>
+
+                <div class="question-mark">
+                    ?
+                </div>
+
+                <h2 id="question">
+                    Question goes here
+                </h2>
+
+                <div id="answers" class="answers">
+                </div>
+
+                <div id="feedback" class="feedback"></div>
+
+            </div>
+
+
+            <!-- CLUE -->
+
+            <div id="clueCard" class="card clue-card hidden">
+
+                <div class="section-label">
+                    TREASURE CLUE
+                </div>
+
+                <div class="scroll">
+
+                    <p class="scroll-title">
+                        Your path continues...
+                    </p>
+
+                    <p id="clueText">
+                        Your clue appears here.
+                    </p>
+
+                </div>
+
+                <button id="findQrButton" class="main-button">
+                    HUNT FOR THE QR
+                    <span>→</span>
+                </button>
+
+            </div>
+
+
+            <!-- QR -->
+
+            <div id="qrCard" class="card qr-card hidden">
+
+                <div class="section-label">
+                    CHECKPOINT
+                </div>
+
+                <div class="qr-icon">
+                    ⌗
+                </div>
+
+                <h2>
+                    Find the hidden mark
+                </h2>
+
+                <p>
+                    Follow your clue and find the QR
+                    checkpoint hidden in the department.
+                </p>
+
+                <button id="scanButton" class="main-button">
+                    SCAN CHECKPOINT
+                </button>
+
+                <div id="qrFeedback" class="feedback"></div>
+
+            </div>
+
+
+            <button
+                id="nextButton"
+                class="next-button hidden"
+            >
+                CONTINUE THE HUNT →
             </button>
 
-        </div>
+        </section>
+
+
+        <!-- =========================
+             END SCREEN
+        ========================== -->
+
+        <section id="endScreen" class="screen hidden">
+
+            <div class="end-crest">
+                ⚔
+            </div>
+
+            <p class="eyebrow">
+                HUNT COMPLETE
+            </p>
+
+            <h1>
+                WELL FOUGHT,
+                <span>HUNTER.</span>
+            </h1>
+
+            <div class="divider">
+                <span>✦</span>
+            </div>
+
+            <div class="card result-card">
+
+                <p>
+                    Final honor
+                </p>
+
+                <strong id="finalScore">
+                    0
+                </strong>
+
+                <span>
+                    POINTS
+                </span>
+
+                <p id="finalMessage" class="final-message"></p>
+
+                <button
+                    id="restartButton"
+                    class="main-button"
+                >
+                    HUNT AGAIN
+                </button>
+
+            </div>
+
+
+            <div class="card leaderboard-card">
+
+                <div class="section-label">
+                    HALL OF HUNTERS
+                </div>
+
+                <div id="leaderboard">
+                </div>
+
+            </div>
+
+        </section>
 
     </main>
 
     <script src="script.js"></script>
 
 </body>
+
 </html>

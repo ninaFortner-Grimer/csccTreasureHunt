@@ -1,14 +1,11 @@
-const startButton = document.getElementById("startButton");
+// **********************************
+// CSCC TREASURE HUNT
+// Frontend MVP
+// =********************************
 
-startButton.addEventListener("click", function () {
 
-    const playerName = document.getElementById("playerName").value;
+// --------------------
+// QUESTIONS
+// --------------------
 
-    if (playerName.trim() === "") {
-        alert("Please enter a nickname!");
-        return;
-    }
 
-    alert("Welcome to the hunt, " + playerName + " 🏴‍☠️");
-
-});
