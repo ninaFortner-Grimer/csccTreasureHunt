@@ -2,237 +2,260 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CSCC Treasure Hunt — Welcome Day 2026. Solve quizzes, follow clues, find hidden QR checkpoints, and score points.">
+  <title>CSCC Treasure Hunt — Welcome Day 2026</title>
 
-    <title>CSCC Treasure Hunt</title>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-
-    <div class="background-glow"></div>
-
-    <main class="app">
-
-        <!-- welcome -->
-
-        <section id="welcomeScreen" class="screen">
-
-            <div class="hero">
-
-                <div class="crest">⚔</div>
-
-                <p class="eyebrow">CSCC • WELCOME DAY</p>
-
-                <h1>
-                    TREASURE
-                    <span>HUNT</span>
-                </h1>
-
-                <div class="divider">
-                    <span>✦</span>
-                </div>
-
-                <p class="subtitle">
-                    Solve the challenge.<br>
-                    Follow the clue.<br>
-                    Find the treasure.
-                </p>
-
-            </div>
-
-            <div class="card start-card">
-
-                <div class="card-symbol">◈</div>
-
-                <h2>Enter the Hunt</h2>
-
-                <p>
-                    Every hunter gets a different path.
-                    Think carefully. Move quickly.
-                </p>
-
-                <input
-                    type="text"
-                    id="playerName"
-                    placeholder="Your nickname"
-                    maxlength="20"
-                >
-
-                <button id="startButton" class="main-button">
-                    BEGIN THE HUNT
-                    <span>→</span>
-                </button>
-
-                <p id="startError" class="error"></p>
-
-            </div>
-
-            <p class="bottom-note">
-                Solve • Search • Scan • Score
-            </p>
-
-        </section>
-
-
-        <!-- game -->
-
-        <section id="gameScreen" class="screen hidden">
-
-            <header class="game-header">
-
-                <div class="player-info">
-                    <span>HUNTER</span>
-                    <strong id="displayName">Player</strong>
-                </div>
-
-                <div class="score-info">
-                    <span>HONOR</span>
-                    <strong>
-                        <b id="score">0</b>
-                        <small>PTS</small>
-                    </strong>
-                </div>
-
-            </header>
-
-            <div class="progress-line">
-                <div id="progressBar"></div>
-            </div>
-
-
-            <div class="card challenge-card">
-
-                <div class="challenge-header">
-
-                    <span class="section-label">
-                        SCROLL OF KNOWLEDGE
-                    </span>
-
-                    <span id="questionNumber">1 / 5</span>
-
-                </div>
-
-                <div class="question-mark">?</div>
-
-                <h2 id="question">
-                    Question goes here
-                </h2>
-
-                <div id="answers" class="answers"></div>
-
-                <div id="feedback" class="feedback"></div>
-
-            </div>
-
-
-            <div id="clueCard" class="card clue-card hidden">
-
-                <div class="section-label">
-                    TREASURE CLUE
-                </div>
-
-                <div class="scroll">
-
-                    <p class="scroll-title">
-                        Your path continues...
-                    </p>
-
-                    <p id="clueText"></p>
-
-                </div>
-
-                <button id="findQrButton" class="main-button">
-                    HUNT FOR THE QR
-                    <span>→</span>
-                </button>
-
-            </div>
-
-
-            <div id="qrCard" class="card qr-card hidden">
-
-                <div class="section-label">
-                    CHECKPOINT
-                </div>
-
-                <div class="qr-icon">⌗</div>
-
-                <h2>Find the hidden mark</h2>
-
-                <p>
-                    Follow your clue and find the QR
-                    checkpoint hidden in the department.
-                </p>
-
-                <button id="scanButton" class="main-button">
-                    SCAN CHECKPOINT
-                </button>
-
-                <div id="qrFeedback" class="feedback"></div>
-
-            </div>
-
-
-            <button id="nextButton" class="next-button hidden">
-                CONTINUE THE HUNT →
-            </button>
-
-        </section>
-
-
-        <!-- end -->
-
-        <section id="endScreen" class="screen hidden">
-
-            <div class="end-crest">⚔</div>
-
-            <p class="eyebrow">HUNT COMPLETE</p>
-
-            <h1>
-                WELL FOUGHT,
-                <span>HUNTER.</span>
-            </h1>
-
-            <div class="divider">
-                <span>✦</span>
-            </div>
-
-            <div class="card result-card">
-
-                <p>Final honor</p>
-
-                <strong id="finalScore">0</strong>
-
-                <span>POINTS</span>
-
-                <p id="finalMessage" class="final-message"></p>
-
-                <button id="restartButton" class="main-button">
-                    HUNT AGAIN
-                </button>
-
-            </div>
-
-
-            <div class="card leaderboard-card">
-
-                <div class="section-label">
-                    HALL OF HUNTERS
-                </div>
-
-                <div id="leaderboard"></div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-    <script src="script.js"></script>
-
+  <main class="app">
+
+
+    <!-- ══════════════════════════════════════
+         SCREEN 1 · LANDING
+    ══════════════════════════════════════ -->
+    <section id="welcomeScreen" class="screen active">
+      <div class="landing">
+
+        <div class="landing-logo">
+<img src="assets/cscc logo.png" alt="Computer Science Club — CSCC" class="logo-img">        </div>
+
+        <p class="eyebrow">CSCC • WELCOME DAY 2026</p>
+
+        <h1 class="landing-title">
+          TREASURE
+          <span class="gold">HUNT</span>
+        </h1>
+
+        <p class="landing-subtitle">Solve. Search. Scan. Score.</p>
+
+        <button id="startButton" class="cta-button">
+          START THE HUNT
+          <svg class="btn-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <button id="dashboardToggleWelcome" class="organizer-link">Organizer View</button>
+
+      </div>
+    </section>
+
+
+    <!-- ══════════════════════════════════════
+         SCREEN 2 · NICKNAME ENTRY
+    ══════════════════════════════════════ -->
+    <section id="nicknameScreen" class="screen">
+      <div class="nickname-container">
+
+        <div class="nickname-brand">
+          <img src="assets/cscc-logo.svg" alt="CSCC" class="logo-img-sm">
+          <span class="eyebrow">CSCC • WELCOME DAY 2026</span>
+        </div>
+
+        <h2>Who are you?</h2>
+        <p class="lead">Enter a nickname to join the hunt. Every participant gets a unique path.</p>
+
+        <div class="card">
+          <div class="field">
+            <label for="playerName">Nickname</label>
+            <input
+              type="text"
+              id="playerName"
+              placeholder="e.g. Alan Turing"
+              maxlength="20"
+              autocomplete="off"
+              spellcheck="false"
+            >
+          </div>
+          <button id="beginButton" class="cta-button">
+            BEGIN THE HUNT
+            <svg class="btn-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <p id="startError" class="error" role="alert" aria-live="polite"></p>
+        </div>
+
+        <button id="backToLanding" class="organizer-link" style="margin-top: 12px;">← Back</button>
+
+      </div>
+    </section>
+
+
+    <!-- ══════════════════════════════════════
+         SCREEN 3 · GAME
+    ══════════════════════════════════════ -->
+    <section id="gameScreen" class="screen">
+
+      <header class="game-header">
+        <div class="player-info">
+          <span class="info-label">PLAYER</span>
+          <span class="info-value" id="displayName">Player</span>
+        </div>
+        <div class="score-info">
+          <span class="info-label">SCORE</span>
+          <span class="info-value score-value">
+            <b id="score">0</b><small>PTS</small>
+          </span>
+        </div>
+      </header>
+
+      <div class="progress-track">
+        <div id="progressBar"></div>
+      </div>
+
+      <!-- Quiz Card -->
+      <div class="card challenge-card">
+        <div class="challenge-card-top">
+          <span class="section-label">CHALLENGE</span>
+          <span class="q-counter" id="questionNumber">1 / 5</span>
+        </div>
+        <h2 id="question">Question goes here</h2>
+        <div id="answers" class="answers"></div>
+        <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+      </div>
+
+      <!-- Clue Card -->
+      <div id="clueCard" class="card clue-card hidden">
+        <div class="section-label">YOUR CLUE</div>
+        <div class="clue-body">
+          <p id="clueText"></p>
+        </div>
+        <button id="findQrButton" class="cta-button" style="margin-top: 16px;">
+          I FOUND THE QR CODE
+          <svg class="btn-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- QR Checkpoint Card -->
+      <div id="qrCard" class="card qr-card hidden">
+        <div class="section-label">CHECKPOINT</div>
+        <div class="qr-icon" aria-hidden="true">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <path d="M14 14h2v2h-2zM18 14v2M18 16h2M14 18h2M18 20h2v-2"/>
+          </svg>
+        </div>
+        <h2>Scan the checkpoint</h2>
+        <p class="body-text">Find the hidden QR code matching your clue and scan it to earn your point.</p>
+        <span class="demo-label">DEMO MODE — tap to simulate scan</span>
+        <button id="scanButton" class="cta-button">SCAN CHECKPOINT</button>
+        <div id="qrFeedback" class="feedback" role="status" aria-live="polite"></div>
+      </div>
+
+      <button id="nextButton" class="next-button hidden">CONTINUE THE HUNT →</button>
+
+    </section>
+
+
+    <!-- ══════════════════════════════════════
+         SCREEN 4 · COMPLETION
+    ══════════════════════════════════════ -->
+    <section id="endScreen" class="screen">
+
+      <div class="end-header">
+        <p class="eyebrow">HUNT COMPLETE</p>
+        <h1>
+          You did it,
+          <span class="gold" id="endPlayerName">Hunter</span>
+        </h1>
+        <p id="finalMessage" class="end-message"></p>
+      </div>
+
+      <div class="card result-card">
+        <div class="score-display">
+          <span class="score-label">FINAL SCORE</span>
+          <strong id="finalScore">0</strong>
+          <span class="score-unit">POINTS</span>
+        </div>
+        <div class="result-buttons">
+          <button id="restartButton" class="cta-button">PLAY AGAIN</button>
+          <button id="dashboardToggleEnd" class="outline-button">ORGANIZER VIEW</button>
+        </div>
+      </div>
+
+      <div class="card leaderboard-card">
+        <div class="section-label">RANKINGS</div>
+        <p class="leaderboard-note">DEMO — browser-local scores only, not shared across devices</p>
+        <div id="leaderboard" class="leaderboard-list"></div>
+      </div>
+
+    </section>
+
+
+    <!-- ══════════════════════════════════════
+         SCREEN 5 · ORGANIZER DASHBOARD
+    ══════════════════════════════════════ -->
+    <section id="dashboardScreen" class="screen">
+
+      <div class="dashboard-header">
+        <div>
+          <h2>Event Dashboard</h2>
+          <p class="demo-notice">DEMO — browser-local data + sample participants. Not a live shared view.</p>
+        </div>
+        <button id="dashboardToggleBack" class="ghost-button">← Exit</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-label">Participants</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statPlaying">0</div>
+          <div class="stat-label">Playing</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statCompleted">0</div>
+          <div class="stat-label">Completed</div>
+        </div>
+      </div>
+
+      <div class="dashboard-controls">
+        <input
+          type="text"
+          id="dashboardSearch"
+          placeholder="Search by player name…"
+          class="search-input"
+        >
+        <button id="dashboardRefresh" class="refresh-btn">↺ Refresh</button>
+      </div>
+
+      <div class="dashboard-container">
+
+        <div class="card">
+          <div class="section-label">Live Rankings</div>
+          <div id="dashboardLeaderboard" class="leaderboard-list"></div>
+          <p id="dashboardEmpty" class="empty-state hidden">No participants match this filter.</p>
+        </div>
+
+        <div class="card">
+          <div class="section-label">Activity</div>
+          <div id="dashboardActivity" class="activity-list"></div>
+          <p id="dashboardActivityEmpty" class="empty-state">Waiting for players to join…</p>
+        </div>
+
+      </div>
+
+    </section>
+
+
+  </main>
+
+  <script src="script.js"></script>
 </body>
 
 </html>
