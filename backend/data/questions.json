@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "text": "What does CPU stand for?",
+    "choices": ["Central Processing Unit", "Computer Personal Unit", "Central Program Unit", "Core Processing Unit"],
+    "answer": "Central Processing Unit"
+  },
+  {
+    "id": 2,
+    "text": "Which of these is a programming language?",
+    "choices": ["Python", "HTML", "Windows", "Chrome"],
+    "answer": "Python"
+  },
+  {
+    "id": 3,
+    "text": "What does RAM stand for?",
+    "choices": ["Random Access Memory", "Read Access Module", "Rapid Active Memory", "Run And Manage"],
+    "answer": "Random Access Memory"
+  },
+  {
+    "id": 4,
+    "text": "What is the binary representation of the number 5?",
+    "choices": ["101", "110", "011", "111"],
+    "answer": "101"
+  },
+  {
+    "id": 5,
+    "text": "Which protocol is used to load secure websites?",
+    "choices": ["HTTPS", "FTP", "SMTP", "SSH"],
+    "answer": "HTTPS"
+  },
+  {
+    "id": 6,
+    "text": "Which device is used to connect a computer to a network?",
+    "choices": ["Network card", "Sound card", "Graphics card", "Power supply"],
+    "answer": "Network card"
+  },
+  {
+    "id": 7,
+    "text": "What does HTML stand for?",
+    "choices": ["HyperText Markup Language", "High Tech Modern Language", "HyperText Machine Language", "Home Tool Markup Language"],
+    "answer": "HyperText Markup Language"
+  },
+  {
+    "id": 8,
+    "text": "Which of these is a strong password?",
+    "choices": ["T!9x#Lq2$vP", "123456", "password", "azerty"],
+    "answer": "T!9x#Lq2$vP"
+  },
+  {
+    "id": 9,
+    "text": "What is the main purpose of a firewall?",
+    "choices": ["Block unauthorized network traffic", "Speed up the internet", "Store files", "Cool the CPU"],
+    "answer": "Block unauthorized network traffic"
+  },
+  {
+    "id": 10,
+    "text": "Which symbol starts a single-line comment in JavaScript?",
+    "choices": ["//", "#", "<!--", "--"],
+    "answer": "//"
+  }
+]

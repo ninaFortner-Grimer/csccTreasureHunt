@@ -1,0 +1,14 @@
+[
+  {
+    "id": "18464d7c-43d1-487f-8721-b8aa280caf63",
+    "name": "Ali",
+    "token": "c1b00f74-4eda-4928-a18e-92c2be09e07a",
+    "score": 0,
+    "state": "waiting_answer",
+    "currentQuestionId": 8,
+    "currentQrId": "QR-03",
+    "scannedQrs": [],
+    "startedAt": 1791538394281,
+    "finishedAt": null
+  }
+]

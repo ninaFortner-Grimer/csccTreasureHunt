@@ -1,0 +1,1044 @@
+/* =============================================================
+   CSCC TREASURE HUNT — Design System
+   Fonts:   Space Grotesk (headings) · Plus Jakarta Sans (body)
+   Palette: Deep navy #0A0F34 · Warm gold #FFB95F
+   ============================================================= */
+
+/* ── Google Fonts ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+/* ── Reset ────────────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Design Tokens ────────────────────────────────────────── */
+:root {
+    --bg:             #0A0F34;
+    --bg-card:        #0e1540;
+    --bg-card-alt:    rgba(255, 255, 255, 0.03);
+    --gold:           #FFB95F;
+    --gold-hover:     #ffc87a;
+    --gold-dim:       rgba(255, 185, 95, 0.12);
+    --gold-border:    rgba(255, 185, 95, 0.28);
+    --white:          #F8FAFC;
+    --gray-1:         #CBD5E1;
+    --gray-2:         #8098B2;
+    --gray-3:         #47607A;
+    --gray-4:         #1B2D42;
+    --border:         rgba(255, 255, 255, 0.07);
+    --border-strong:  rgba(255, 255, 255, 0.13);
+    --shadow-card:    0 8px 32px rgba(0, 0, 0, 0.45);
+    --shadow-btn:     0 4px 20px rgba(255, 185, 95, 0.28);
+    --font-head:      'Space Grotesk', system-ui, sans-serif;
+    --font-body:      'Plus Jakarta Sans', system-ui, sans-serif;
+    --radius:         8px;
+    --radius-sm:      6px;
+    --transition:     0.18s ease;
+}
+
+/* ── Base ─────────────────────────────────────────────────── */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    background-color: var(--bg);
+    background-image:
+        radial-gradient(ellipse 100% 55% at 50% -5%,
+            rgba(255, 185, 95, 0.07) 0%,
+            transparent 65%),
+        radial-gradient(ellipse 70% 50% at 80% 90%,
+            rgba(14, 21, 64, 0.6) 0%,
+            transparent 55%);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── App wrapper ──────────────────────────────────────────── */
+.app {
+    width: 92%;
+    max-width: 560px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* ── Screens ──────────────────────────────────────────────── */
+.screen {
+    display: none;
+    width: 100%;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* Vertically centered screens (landing + nickname) */
+#welcomeScreen.active,
+#nicknameScreen.active {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 48px 0;
+}
+
+/* Top-aligned screens (game, end, dashboard) */
+#gameScreen.active,
+#endScreen.active,
+#dashboardScreen.active {
+    display: block;
+    padding: 24px 0 56px;
+}
+
+/* ── Utility ──────────────────────────────────────────────── */
+.hidden {
+    display: none !important;
+}
+
+.gold {
+    color: var(--gold);
+}
+
+/* ── Typography ───────────────────────────────────────────── */
+h1 {
+    font-family: var(--font-head);
+    font-weight: 700;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: var(--white);
+}
+
+h2 {
+    font-family: var(--font-head);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--white);
+}
+
+.eyebrow {
+    font-family: var(--font-head);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+}
+
+.section-label {
+    font-family: var(--font-head);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+}
+
+
+/* ── LANDING SCREEN ───────────────────────────────────────── */
+
+.landing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+}
+
+.landing-logo {
+    width: 72px;
+    height: 72px;
+    margin-bottom: 24px;
+}
+
+.logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.logo-img-sm {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    display: block;
+    flex-shrink: 0;
+}
+
+.landing .eyebrow {
+    margin-bottom: 20px;
+}
+
+.landing-title {
+    font-size: clamp(3rem, 12vw, 5rem);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+
+.landing-title .gold {
+    display: block;
+}
+
+.landing-subtitle {
+    color: var(--gray-2);
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    margin-bottom: 36px;
+}
+
+.organizer-link {
+    display: block;
+    width: 100%;
+    margin-top: 16px;
+    padding: 10px;
+    background: transparent;
+    color: var(--gray-3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-head);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color var(--transition), color var(--transition);
+}
+
+.organizer-link:hover {
+    border-color: var(--gray-4);
+    color: var(--gray-2);
+}
+
+
+/* ── NICKNAME SCREEN ──────────────────────────────────────── */
+
+.nickname-container {
+    width: 100%;
+}
+
+.nickname-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+}
+
+.nickname-container h2 {
+    font-size: clamp(1.6rem, 6vw, 2rem);
+    margin-bottom: 8px;
+}
+
+.lead {
+    color: var(--gray-2);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+
+/* ── CARDS ────────────────────────────────────────────────── */
+
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-top: 20px;
+    box-shadow: var(--shadow-card);
+}
+
+
+/* ── INPUT ────────────────────────────────────────────────── */
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+label {
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--gray-1);
+    display: block;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--white);
+    border: 1px solid var(--gray-4);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color var(--transition), background var(--transition);
+}
+
+input[type="text"]::placeholder {
+    color: var(--gray-3);
+}
+
+input[type="text"]:focus {
+    border-color: var(--gold);
+    background: rgba(255, 185, 95, 0.04);
+}
+
+
+/* ── BUTTONS ──────────────────────────────────────────────── */
+
+button {
+    font-family: var(--font-body);
+    cursor: pointer;
+    border: none;
+    border-radius: var(--radius-sm);
+    transition:
+        transform var(--transition),
+        background var(--transition),
+        box-shadow var(--transition),
+        border-color var(--transition),
+        color var(--transition),
+        opacity var(--transition);
+}
+
+button:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+}
+
+/* Primary CTA — warm gold fill */
+.cta-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 16px;
+    padding: 15px 24px;
+    background: var(--gold);
+    color: #0A0F34;
+    font-family: var(--font-head);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
+}
+
+.cta-button:hover {
+    background: var(--gold-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-btn);
+}
+
+.cta-button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.cta-button:disabled {
+    opacity: 0.55;
+    cursor: default;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-icon {
+    flex-shrink: 0;
+}
+
+/* Outline variant */
+.outline-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 10px;
+    padding: 14px 24px;
+    background: transparent;
+    color: var(--gray-1);
+    border: 1px solid var(--gray-4);
+    font-family: var(--font-head);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
+}
+
+.outline-button:hover {
+    border-color: var(--gold-border);
+    color: var(--gold);
+}
+
+/* Ghost / small action */
+.ghost-button {
+    background: transparent;
+    color: var(--gray-2);
+    border: 1px solid var(--gray-4);
+    padding: 9px 16px;
+    font-family: var(--font-head);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.ghost-button:hover {
+    border-color: var(--gold-border);
+    color: var(--gold);
+}
+
+
+/* ── GAME SCREEN ──────────────────────────────────────────── */
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+}
+
+.info-label {
+    display: block;
+    font-family: var(--font-head);
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray-3);
+    margin-bottom: 4px;
+}
+
+.info-value {
+    font-family: var(--font-head);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--white);
+}
+
+.score-info {
+    text-align: right;
+}
+
+.score-value {
+    color: var(--gold);
+    font-size: 1.2rem;
+}
+
+.score-value small {
+    font-size: 0.52rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--gray-3);
+    margin-left: 2px;
+    vertical-align: middle;
+}
+
+
+/* ── PROGRESS BAR ─────────────────────────────────────────── */
+
+.progress-track {
+    width: 100%;
+    height: 3px;
+    background: var(--gray-4);
+    border-radius: 2px;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+#progressBar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--gold) 0%, #ffd490 100%);
+    border-radius: 2px;
+    transition: width 0.35s ease;
+}
+
+
+/* ── CHALLENGE CARD ───────────────────────────────────────── */
+
+.challenge-card {
+    margin-top: 0;
+}
+
+.challenge-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.q-counter {
+    font-family: var(--font-head);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--gray-3);
+}
+
+#question {
+    font-family: var(--font-head);
+    font-size: clamp(1.05rem, 3.5vw, 1.25rem);
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.45;
+    margin-bottom: 20px;
+}
+
+
+/* ── ANSWER BUTTONS ───────────────────────────────────────── */
+
+.answers {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.answer-button {
+    width: 100%;
+    padding: 14px 16px;
+    text-align: left;
+    background: var(--bg-card-alt);
+    color: var(--gray-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.4;
+    transition:
+        border-color var(--transition),
+        background var(--transition),
+        color var(--transition);
+}
+
+.answer-button:hover:not(:disabled) {
+    border-color: var(--gold-border);
+    background: var(--gold-dim);
+    color: var(--white);
+}
+
+.answer-button.correct {
+    border-color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+    color: #86efac;
+}
+
+.answer-button.wrong {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.09);
+    color: #fca5a5;
+}
+
+.answer-button:disabled {
+    cursor: default;
+}
+
+.feedback {
+    min-height: 20px;
+    margin-top: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+
+/* ── CLUE CARD ────────────────────────────────────────────── */
+
+.clue-card {
+    border-color: var(--gold-border);
+}
+
+.clue-card .section-label {
+    margin-bottom: 14px;
+    display: block;
+}
+
+.clue-body {
+    padding: 16px 18px;
+    background: rgba(255, 185, 95, 0.05);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 4px 4px 0;
+}
+
+#clueText {
+    color: var(--gray-1);
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+
+/* ── QR CHECKPOINT CARD ───────────────────────────────────── */
+
+.qr-card {
+    text-align: center;
+}
+
+.qr-card .section-label {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.qr-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 18px auto;
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius-sm);
+    color: var(--gold);
+}
+
+.qr-card h2 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
+.body-text {
+    color: var(--gray-2);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin-bottom: 4px;
+}
+
+.demo-label {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 5px 11px;
+    background: rgba(255, 185, 95, 0.08);
+    border: 1px solid var(--gold-border);
+    border-radius: 4px;
+    color: var(--gold);
+    font-family: var(--font-head);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+
+/* ── NEXT BUTTON ──────────────────────────────────────────── */
+
+.next-button {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 14px 24px;
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-head);
+    font-size: 0.83rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.next-button:hover {
+    background: var(--gold-dim);
+    border-color: var(--gold);
+}
+
+
+/* ── END SCREEN ───────────────────────────────────────────── */
+
+.end-header {
+    padding-top: 16px;
+    margin-bottom: 4px;
+    text-align: center;
+}
+
+.end-header .eyebrow {
+    margin-bottom: 14px;
+    display: block;
+}
+
+.end-header h1 {
+    font-size: clamp(2rem, 7vw, 2.8rem);
+}
+
+.end-message {
+    color: var(--gray-2);
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+.result-card {
+    text-align: center;
+}
+
+.score-display {
+    margin: 8px 0 20px;
+}
+
+.score-label {
+    display: block;
+    font-family: var(--font-head);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gray-3);
+    margin-bottom: 8px;
+}
+
+#finalScore {
+    display: block;
+    font-family: var(--font-head);
+    font-size: clamp(3.5rem, 14vw, 5.5rem);
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+}
+
+.score-unit {
+    display: block;
+    font-family: var(--font-head);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gray-3);
+    margin-top: 8px;
+}
+
+.result-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.result-buttons .cta-button {
+    margin-top: 0;
+}
+
+
+/* ── LEADERBOARD ──────────────────────────────────────────── */
+
+.leaderboard-card .section-label {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.leaderboard-note {
+    font-size: 0.7rem;
+    color: var(--gray-3);
+    margin-top: 4px;
+}
+
+.leaderboard-list {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+}
+
+.leaderboard-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.leaderboard-row:last-child {
+    border-bottom: none;
+}
+
+.player-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.player-place {
+    font-family: var(--font-head);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--gray-3);
+    min-width: 26px;
+}
+
+.player-name strong {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--white);
+}
+
+.player-score {
+    font-family: var(--font-head);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+}
+
+.empty-state {
+    color: var(--gray-3);
+    font-size: 0.85rem;
+    padding: 14px 0;
+}
+
+.error {
+    color: #f87171;
+    font-size: 0.82rem;
+    font-weight: 500;
+    margin-top: 10px;
+    min-height: 18px;
+}
+
+
+/* ── ORGANIZER DASHBOARD ──────────────────────────────────── */
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.dashboard-header h2 {
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+}
+
+.demo-notice {
+    font-size: 0.72rem;
+    color: var(--gray-3);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 18px 12px;
+    text-align: center;
+}
+
+.stat-value {
+    font-family: var(--font-head);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1.1;
+    margin-bottom: 6px;
+}
+
+.stat-label {
+    font-family: var(--font-head);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gray-3);
+}
+
+.dashboard-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    align-items: center;
+}
+
+.search-input {
+    flex: 1;
+    margin: 0;
+}
+
+.refresh-btn {
+    padding: 0 18px;
+    height: 46px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--gray-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-head);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color var(--transition), color var(--transition);
+}
+
+.refresh-btn:hover {
+    border-color: var(--gold-border);
+    color: var(--gold);
+}
+
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dashboard-container .card {
+    margin-top: 0;
+}
+
+.dashboard-container .section-label {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    margin-top: 14px;
+}
+
+.activity-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+}
+
+.activity-row:last-child {
+    border-bottom: none;
+}
+
+.activity-row strong {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 3px;
+}
+
+.activity-meta {
+    font-size: 0.78rem;
+    color: var(--gray-2);
+    line-height: 1.4;
+}
+
+
+/* ── RESPONSIVE — MOBILE ──────────────────────────────────── */
+
+@media (max-width: 420px) {
+
+    .landing-logo {
+        width: 60px;
+        height: 60px;
+    }
+
+    .landing-title {
+        font-size: 2.8rem;
+    }
+
+    .card {
+        padding: 20px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dashboard-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .refresh-btn {
+        height: 44px;
+        width: 100%;
+    }
+}
+
+/* ── RESPONSIVE — TABLET / DESKTOP ────────────────────────── */
+
+@media (min-width: 640px) {
+
+    .app {
+        max-width: 600px;
+    }
+
+    .result-buttons {
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    .result-buttons .cta-button,
+    .result-buttons .outline-button {
+        flex: 1;
+        margin-top: 0;
+    }
+}
+
+@media (min-width: 1024px) {
+
+    .app {
+        max-width: 680px;
+    }
+
+    #dashboardScreen.active {
+        max-width: 860px;
+        margin: 0 auto;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .dashboard-container {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .dashboard-container .card {
+        flex: 1;
+    }
+}
+
+/* ── REDUCED MOTION ───────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    #progressBar {
+        transition: none;
+    }
+}
