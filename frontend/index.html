@@ -4,9 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>CSCC Treasure Hunt</title>
-
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -16,59 +14,51 @@
 
     <main class="app">
 
-        <!-- welcome -->
+        <!-- PLAYER WELCOME SCREEN -->
 
-        <section id="welcomeScreen" class="screen">
+        <section id="welcomeScreen" class="screen active">
 
             <div class="hero">
-
                 <div class="crest">⚔</div>
-
                 <p class="eyebrow">CSCC • WELCOME DAY</p>
-
                 <h1>
                     TREASURE
                     <span>HUNT</span>
                 </h1>
-
                 <div class="divider">
                     <span>✦</span>
                 </div>
-
                 <p class="subtitle">
                     Solve the challenge.<br>
                     Follow the clue.<br>
                     Find the treasure.
                 </p>
-
             </div>
 
             <div class="card start-card">
-
                 <div class="card-symbol">◈</div>
-
                 <h2>Enter the Hunt</h2>
-
                 <p>
                     Every hunter gets a different path.
                     Think carefully. Move quickly.
                 </p>
-
                 <input
                     type="text"
                     id="playerName"
                     placeholder="Your nickname"
                     maxlength="20"
+                    autocomplete="off"
                 >
-
                 <button id="startButton" class="main-button">
                     BEGIN THE HUNT
                     <span>→</span>
                 </button>
-
                 <p id="startError" class="error"></p>
-
             </div>
+
+            <button id="dashboardToggleWelcome" class="dashboard-toggle">
+                📊 Organizer View
+            </button>
 
             <p class="bottom-note">
                 Solve • Search • Scan • Score
@@ -77,17 +67,15 @@
         </section>
 
 
-        <!-- game -->
+        <!-- PLAYER GAME SCREEN -->
 
         <section id="gameScreen" class="screen hidden">
 
             <header class="game-header">
-
                 <div class="player-info">
                     <span>HUNTER</span>
                     <strong id="displayName">Player</strong>
                 </div>
-
                 <div class="score-info">
                     <span>HONOR</span>
                     <strong>
@@ -95,86 +83,52 @@
                         <small>PTS</small>
                     </strong>
                 </div>
-
             </header>
 
             <div class="progress-line">
                 <div id="progressBar"></div>
             </div>
 
-
+            <!-- Quiz Card -->
             <div class="card challenge-card">
-
                 <div class="challenge-header">
-
-                    <span class="section-label">
-                        SCROLL OF KNOWLEDGE
-                    </span>
-
+                    <span class="section-label">SCROLL OF KNOWLEDGE</span>
                     <span id="questionNumber">1 / 5</span>
-
                 </div>
-
                 <div class="question-mark">?</div>
-
-                <h2 id="question">
-                    Question goes here
-                </h2>
-
+                <h2 id="question">Question goes here</h2>
                 <div id="answers" class="answers"></div>
-
                 <div id="feedback" class="feedback"></div>
-
             </div>
 
-
+            <!-- Clue Card -->
             <div id="clueCard" class="card clue-card hidden">
-
-                <div class="section-label">
-                    TREASURE CLUE
-                </div>
-
+                <div class="section-label">TREASURE CLUE</div>
                 <div class="scroll">
-
-                    <p class="scroll-title">
-                        Your path continues...
-                    </p>
-
+                    <p class="scroll-title">Your path continues...</p>
                     <p id="clueText"></p>
-
                 </div>
-
                 <button id="findQrButton" class="main-button">
                     HUNT FOR THE QR
                     <span>→</span>
                 </button>
-
             </div>
 
-
+            <!-- QR Checkpoint Card -->
             <div id="qrCard" class="card qr-card hidden">
-
-                <div class="section-label">
-                    CHECKPOINT
-                </div>
-
+                <div class="section-label">CHECKPOINT</div>
                 <div class="qr-icon">⌗</div>
-
                 <h2>Find the hidden mark</h2>
-
                 <p>
                     Follow your clue and find the QR
                     checkpoint hidden in the department.
                 </p>
-
+                <p class="demo-label">🔷 DEMO: Click scan to confirm checkpoint</p>
                 <button id="scanButton" class="main-button">
                     SCAN CHECKPOINT
                 </button>
-
                 <div id="qrFeedback" class="feedback"></div>
-
             </div>
-
 
             <button id="nextButton" class="next-button hidden">
                 CONTINUE THE HUNT →
@@ -183,47 +137,95 @@
         </section>
 
 
-        <!-- end -->
+        <!-- PLAYER END SCREEN -->
 
         <section id="endScreen" class="screen hidden">
 
             <div class="end-crest">⚔</div>
-
             <p class="eyebrow">HUNT COMPLETE</p>
-
             <h1>
                 WELL FOUGHT,
                 <span>HUNTER.</span>
             </h1>
-
             <div class="divider">
                 <span>✦</span>
             </div>
 
             <div class="card result-card">
-
                 <p>Final honor</p>
-
                 <strong id="finalScore">0</strong>
-
                 <span>POINTS</span>
-
                 <p id="finalMessage" class="final-message"></p>
-
                 <button id="restartButton" class="main-button">
                     HUNT AGAIN
                 </button>
-
             </div>
 
-
             <div class="card leaderboard-card">
+                <div class="section-label">HALL OF HUNTERS</div>
+                <p class="leaderboard-note">🔷 DEMO: Browser-local leaderboard</p>
+                <div id="leaderboard" class="leaderboard-list"></div>
+            </div>
 
-                <div class="section-label">
-                    HALL OF HUNTERS
+        </section>
+
+
+        <!-- ORGANIZER DASHBOARD -->
+
+        <section id="dashboardScreen" class="screen hidden">
+
+            <div class="dashboard-header">
+                <h1>Event Dashboard</h1>
+                <button id="dashboardToggleBack" class="dashboard-toggle">
+                    ← Back to Hunt
+                </button>
+            </div>
+
+            <div class="dashboard-container">
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statTotal">0</div>
+                        <div class="stat-label">Total Participants</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statPlaying">0</div>
+                        <div class="stat-label">Currently Playing</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statCompleted">0</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
                 </div>
 
-                <div id="leaderboard"></div>
+                <!-- Controls -->
+                <div class="dashboard-controls">
+                    <input
+                        type="text"
+                        id="dashboardSearch"
+                        placeholder="Search by player name..."
+                        class="search-input"
+                    >
+                    <button id="dashboardRefresh" class="refresh-button">
+                        🔄 Refresh
+                    </button>
+                </div>
+
+                <!-- Leaderboard -->
+                <div class="card dashboard-leaderboard">
+                    <div class="section-label">Live Leaderboard</div>
+                    <p class="leaderboard-note">🔷 DEMO DATA — Browser-local storage only</p>
+                    <div id="dashboardLeaderboard" class="leaderboard-list"></div>
+                    <p id="dashboardEmpty" class="empty-state">No participants yet. Game will begin soon.</p>
+                </div>
+
+                <!-- Current Activity -->
+                <div class="card dashboard-activity">
+                    <div class="section-label">Current Activity</div>
+                    <div id="dashboardActivity" class="activity-list"></div>
+                    <p id="dashboardActivityEmpty" class="empty-state">Waiting for players to join...</p>
+                </div>
 
             </div>
 
