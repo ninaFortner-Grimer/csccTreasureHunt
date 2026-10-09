@@ -1,7 +1,7 @@
+
 // CSCC Treasure Hunt — Welcome Day 2026
 // Frontend prototype. Quiz logic and scoring run client-side.
-// Backend integration (POST /api/player, POST /api/challenge/answer,
-// POST /api/qr/scan, GET /api/leaderboard) to be connected when ready.
+// Backend integration can be connected when the backend is ready.
 
 // ── Question Bank ─────────────────────────────────────────────────────────────
 const questions = [
@@ -67,13 +67,13 @@ const questions = [
     }
 ];
 
-// ── Demo Participants (dashboard seed data) ───────────────────────────────────
+// ── Demo Participants ─────────────────────────────────────────────────────────
 const demoParticipants = [
-    { name: "Ava",   score: 2, status: "Playing",   challenge: "Question 3", checkpoint: "QR-02" },
-    { name: "Leo",   score: 4, status: "Playing",   challenge: "Question 5", checkpoint: "QR-05" },
-    { name: "Maya",  score: 1, status: "Playing",   challenge: "Question 2", checkpoint: "QR-02" },
-    { name: "Jules", score: 5, status: "Completed", challenge: "Complete",   checkpoint: "Finished" },
-    { name: "Riley", score: 3, status: "Playing",   challenge: "Question 4", checkpoint: "QR-04" }
+    { name: "Ava", score: 2, status: "Playing", challenge: "Question 3", checkpoint: "QR-02" },
+    { name: "Leo", score: 4, status: "Playing", challenge: "Question 5", checkpoint: "QR-05" },
+    { name: "Maya", score: 1, status: "Playing", challenge: "Question 2", checkpoint: "QR-02" },
+    { name: "Jules", score: 5, status: "Completed", challenge: "Complete", checkpoint: "Finished" },
+    { name: "Riley", score: 3, status: "Playing", challenge: "Question 4", checkpoint: "QR-04" }
 ];
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -86,73 +86,74 @@ let usedQuestions = [];
 const totalQuestions = questions.length;
 
 // ── Screen References ─────────────────────────────────────────────────────────
-const welcomeScreen    = document.getElementById("welcomeScreen");
-const nicknameScreen   = document.getElementById("nicknameScreen");   // two-step flow
-const gameScreen       = document.getElementById("gameScreen");
-const endScreen        = document.getElementById("endScreen");
-const dashboardScreen  = document.getElementById("dashboardScreen");
+const welcomeScreen = document.getElementById("welcomeScreen");
+const nicknameScreen = document.getElementById("nicknameScreen");
+const gameScreen = document.getElementById("gameScreen");
+const endScreen = document.getElementById("endScreen");
+const dashboardScreen = document.getElementById("dashboardScreen");
 
 // ── UI References ─────────────────────────────────────────────────────────────
-const playerNameInput      = document.getElementById("playerName");
-const startButton          = document.getElementById("startButton");
-const beginButton          = document.getElementById("beginButton");
-const backToLandingBtn     = document.getElementById("backToLanding");
-const startError           = document.getElementById("startError");
-const displayName          = document.getElementById("displayName");
-const scoreDisplay         = document.getElementById("score");
-const questionElement      = document.getElementById("question");
-const answersContainer     = document.getElementById("answers");
-const feedback             = document.getElementById("feedback");
-const questionNumber       = document.getElementById("questionNumber");
-const clueCard             = document.getElementById("clueCard");
-const clueText             = document.getElementById("clueText");
-const findQrButton         = document.getElementById("findQrButton");
-const qrCard               = document.getElementById("qrCard");
-const scanButton           = document.getElementById("scanButton");
-const qrFeedback           = document.getElementById("qrFeedback");
-const nextButton           = document.getElementById("nextButton");
-const progressBar          = document.getElementById("progressBar");
-const finalScore           = document.getElementById("finalScore");
-const finalMessage         = document.getElementById("finalMessage");
-const leaderboard          = document.getElementById("leaderboard");
-const restartButton        = document.getElementById("restartButton");
+const playerNameInput = document.getElementById("playerName");
+const startButton = document.getElementById("startButton");
+const beginButton = document.getElementById("beginButton");
+const backToLandingBtn = document.getElementById("backToLanding");
+const startError = document.getElementById("startError");
+const displayName = document.getElementById("displayName");
+const scoreDisplay = document.getElementById("score");
+const questionElement = document.getElementById("question");
+const answersContainer = document.getElementById("answers");
+const feedback = document.getElementById("feedback");
+const questionNumber = document.getElementById("questionNumber");
+const clueCard = document.getElementById("clueCard");
+const clueText = document.getElementById("clueText");
+const findQrButton = document.getElementById("findQrButton");
+const qrCard = document.getElementById("qrCard");
+const scanButton = document.getElementById("scanButton");
+const qrFeedback = document.getElementById("qrFeedback");
+const nextButton = document.getElementById("nextButton");
+const progressBar = document.getElementById("progressBar");
+const finalScore = document.getElementById("finalScore");
+const finalMessage = document.getElementById("finalMessage");
+const leaderboard = document.getElementById("leaderboard");
+const restartButton = document.getElementById("restartButton");
 const dashboardToggleWelcome = document.getElementById("dashboardToggleWelcome");
-const dashboardToggleEnd   = document.getElementById("dashboardToggleEnd");
-const dashboardToggleBack  = document.getElementById("dashboardToggleBack");
-const dashboardSearch      = document.getElementById("dashboardSearch");
-const dashboardRefresh     = document.getElementById("dashboardRefresh");
+const dashboardToggleEnd = document.getElementById("dashboardToggleEnd");
+const dashboardToggleBack = document.getElementById("dashboardToggleBack");
+const dashboardSearch = document.getElementById("dashboardSearch");
+const dashboardRefresh = document.getElementById("dashboardRefresh");
 const dashboardLeaderboard = document.getElementById("dashboardLeaderboard");
-const dashboardEmpty       = document.getElementById("dashboardEmpty");
-const dashboardActivity    = document.getElementById("dashboardActivity");
+const dashboardEmpty = document.getElementById("dashboardEmpty");
+const dashboardActivity = document.getElementById("dashboardActivity");
 const dashboardActivityEmpty = document.getElementById("dashboardActivityEmpty");
-const statTotal            = document.getElementById("statTotal");
-const statPlaying          = document.getElementById("statPlaying");
-const statCompleted        = document.getElementById("statCompleted");
+const statTotal = document.getElementById("statTotal");
+const statPlaying = document.getElementById("statPlaying");
+const statCompleted = document.getElementById("statCompleted");
 
 // ── Event Listeners ───────────────────────────────────────────────────────────
 
-// Landing CTA → navigate to nickname screen (two-step flow)
+// Landing CTA → nickname screen
 startButton.addEventListener("click", function () {
     showScreen("nickname");
     playerNameInput.focus();
 });
 
-// Back button on nickname screen → return to landing
-if (backToLandingBtn) {
-    backToLandingBtn.addEventListener("click", function () {
-        startError.textContent = "";
-        showScreen("welcome");
-    });
-}
+// Back button → landing screen
+backToLandingBtn.addEventListener("click", function () {
+    startError.textContent = "";
+    showScreen("welcome");
+});
 
-// Nickname screen CTA → validate and start game
+// Nickname CTA → start game
 beginButton.addEventListener("click", startGame);
 
 // Allow Enter key in nickname input
-playerNameInput.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") startGame();
+playerNameInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+        startGame();
+    }
 });
 
+// Show the QR checkpoint demo
 findQrButton.addEventListener("click", function () {
     clueCard.classList.add("hidden");
     qrCard.classList.remove("hidden");
@@ -160,12 +161,16 @@ findQrButton.addEventListener("click", function () {
     qrFeedback.style.color = "";
 });
 
+// Simulate a successful QR scan for the frontend demo
 scanButton.addEventListener("click", function () {
+    if (!currentQuestion || scanButton.disabled) return;
+
     const checkpoint = currentQuestion.qr;
 
     qrFeedback.textContent =
         "Demo checkpoint " + checkpoint + " accepted for this local prototype. " +
         "Server validation will be required in production.";
+
     qrFeedback.style.color = "#FFB95F";
 
     score++;
@@ -174,20 +179,25 @@ scanButton.addEventListener("click", function () {
     nextButton.classList.remove("hidden");
 });
 
+// Continue to the next question or finish
 nextButton.addEventListener("click", function () {
     if (currentQuestionIndex >= totalQuestions) {
         endGame();
         return;
     }
+
     loadQuestion();
 });
 
+// Restart the game
 restartButton.addEventListener("click", function () {
     playerNameInput.value = "";
-    showScreen("welcome");
+    startError.textContent = "";
     progressBar.style.width = "0%";
+    showScreen("welcome");
 });
 
+// Open organizer dashboard
 dashboardToggleWelcome.addEventListener("click", function () {
     renderDashboard();
     showScreen("dashboard");
@@ -198,25 +208,33 @@ dashboardToggleEnd.addEventListener("click", function () {
     showScreen("dashboard");
 });
 
+// Exit dashboard
 dashboardToggleBack.addEventListener("click", function () {
     showScreen("welcome");
 });
 
+// Refresh dashboard
 dashboardRefresh.addEventListener("click", function () {
     renderDashboard();
 });
 
+// Search dashboard participants
 dashboardSearch.addEventListener("input", function () {
     renderDashboard();
 });
 
 // ── Navigation ────────────────────────────────────────────────────────────────
-
 function showScreen(screenName) {
-    const screens = [welcomeScreen, nicknameScreen, gameScreen, endScreen, dashboardScreen];
+    const screens = [
+        welcomeScreen,
+        nicknameScreen,
+        gameScreen,
+        endScreen,
+        dashboardScreen
+    ];
+
     screens.forEach(function (screen) {
-        if (!screen) return;
-        screen.classList.remove("active");
+        if (screen) screen.classList.remove("active");
     });
 
     if (screenName === "welcome") {
@@ -233,7 +251,6 @@ function showScreen(screenName) {
 }
 
 // ── Game Logic ────────────────────────────────────────────────────────────────
-
 function startGame() {
     const name = playerNameInput.value.trim();
 
@@ -264,7 +281,9 @@ function loadQuestion() {
         return;
     }
 
+    // Pick a question that hasn't appeared in this game
     let randomIndex;
+
     do {
         randomIndex = Math.floor(Math.random() * questions.length);
     } while (usedQuestions.includes(randomIndex));
@@ -274,7 +293,9 @@ function loadQuestion() {
     currentQuestion = questions[randomIndex];
     currentQuestionIndex++;
 
-    questionNumber.textContent = currentQuestionIndex + " / " + totalQuestions;
+    questionNumber.textContent =
+        currentQuestionIndex + " / " + totalQuestions;
+
     updateProgress();
     questionElement.textContent = currentQuestion.question;
     createAnswerButtons(currentQuestion);
@@ -288,17 +309,21 @@ function createAnswerButtons(question) {
 
     shuffledAnswers.forEach(function (answer) {
         const button = document.createElement("button");
+
         button.textContent = answer;
         button.classList.add("answer-button");
+
         button.addEventListener("click", function () {
             checkAnswer(answer, button);
         });
+
         answersContainer.appendChild(button);
     });
 }
 
 function checkAnswer(answer, clickedButton) {
     const answerButtons = document.querySelectorAll(".answer-button");
+
     answerButtons.forEach(function (button) {
         button.disabled = true;
     });
@@ -329,10 +354,13 @@ function resetRound() {
     clueCard.classList.add("hidden");
     qrCard.classList.add("hidden");
     nextButton.classList.add("hidden");
+
     feedback.textContent = "";
     feedback.style.color = "";
+
     qrFeedback.textContent = "";
     qrFeedback.style.color = "";
+
     scanButton.disabled = false;
     answersContainer.innerHTML = "";
 }
@@ -347,13 +375,14 @@ function endGame() {
 
     finalScore.textContent = score;
 
-    // Update the name in the end-screen heading
     const endPlayerName = document.getElementById("endPlayerName");
+
     if (endPlayerName) {
         endPlayerName.textContent = playerName;
     }
 
-    finalMessage.textContent = "You completed all " + totalQuestions + " challenges.";
+    finalMessage.textContent =
+        "You completed all " + totalQuestions + " challenges.";
 
     saveScore();
     showLeaderboard();
@@ -361,101 +390,143 @@ function endGame() {
 }
 
 // ── Persistence ───────────────────────────────────────────────────────────────
-
 function saveScore() {
     const oldScores = getStoredScores();
-    oldScores.push({ name: playerName, score: score });
+
+    oldScores.push({
+        name: playerName,
+        score: score
+    });
+
     oldScores.sort(function (a, b) {
         return b.score - a.score;
     });
-    localStorage.setItem("csccScores", JSON.stringify(oldScores));
+
+    try {
+        localStorage.setItem("csccScores", JSON.stringify(oldScores));
+    } catch (error) {
+        console.warn("Could not save scores in this browser.", error);
+    }
 }
 
 function getStoredScores() {
     try {
-        return JSON.parse(localStorage.getItem("csccScores")) || [];
+        const stored = JSON.parse(localStorage.getItem("csccScores"));
+        return Array.isArray(stored) ? stored : [];
     } catch (error) {
         return [];
     }
 }
 
-// ── Leaderboard ───────────────────────────────────────────────────────────────
-
+// ── Leaderboard ──────────────────────────────────────────────────────────────
 function showLeaderboard() {
     const scores = getStoredScores();
+
     leaderboard.innerHTML = "";
 
     if (!scores.length) {
-        leaderboard.innerHTML = '<div class="empty-state">No scores recorded yet.</div>';
+        leaderboard.innerHTML =
+            '<div class="empty-state">No scores recorded yet.</div>';
         return;
     }
 
     scores.slice(0, 10).forEach(function (player, index) {
         const row = document.createElement("div");
         row.classList.add("leaderboard-row");
-        row.innerHTML = `
-            <div class="player-name">
-                <span class="player-place">#${index + 1}</span>
-                <strong>${player.name}</strong>
-            </div>
-            <span class="player-score">${player.score} pts</span>
-        `;
+
+        const nameContainer = document.createElement("div");
+        nameContainer.classList.add("player-name");
+
+        const place = document.createElement("span");
+        place.classList.add("player-place");
+        place.textContent = "#" + (index + 1);
+
+        const name = document.createElement("strong");
+        name.textContent = player.name;
+
+        const playerScore = document.createElement("span");
+        playerScore.classList.add("player-score");
+        playerScore.textContent = player.score + " pts";
+
+        nameContainer.appendChild(place);
+        nameContainer.appendChild(name);
+        row.appendChild(nameContainer);
+        row.appendChild(playerScore);
         leaderboard.appendChild(row);
     });
 }
 
 // ── Organizer Dashboard ───────────────────────────────────────────────────────
-
 function getDashboardParticipants() {
     const savedScores = getStoredScores();
+
     const savedRows = savedScores.map(function (entry) {
         return {
             name: entry.name,
             score: entry.score,
-            status: entry.score >= 3 ? "Completed" : "Playing",
-            challenge: entry.score >= 3 ? "Complete" : "In progress",
-            checkpoint: entry.score >= 3 ? "Finished" : "QR-0" + Math.min(entry.score + 1, 5)
+            status: entry.score >= 5 ? "Completed" : "Playing",
+            challenge: entry.score >= 5 ? "Complete" : "In progress",
+            checkpoint: entry.score >= 5
+                ? "Finished"
+                : "QR-0" + Math.min(entry.score + 1, 5)
         };
     });
 
     const combined = [...demoParticipants, ...savedRows];
     const seen = new Set();
 
-    return combined.filter(function (item) {
-        const key = (item.name || "").toLowerCase();
-        if (!key || seen.has(key)) {
-            return false;
-        }
-        seen.add(key);
-        return true;
-    }).sort(function (a, b) {
-        return b.score - a.score;
-    });
+    return combined
+        .filter(function (item) {
+            const key = (item.name || "").toLowerCase();
+
+            if (!key || seen.has(key)) return false;
+
+            seen.add(key);
+            return true;
+        })
+        .sort(function (a, b) {
+            return b.score - a.score;
+        });
 }
 
 function renderDashboard() {
     const participants = getDashboardParticipants();
     const searchText = (dashboardSearch.value || "").trim().toLowerCase();
+
     const filtered = participants.filter(function (person) {
         return person.name.toLowerCase().includes(searchText);
     });
 
+    dashboardLeaderboard.innerHTML = "";
+
     if (filtered.length === 0) {
         dashboardEmpty.classList.remove("hidden");
-        dashboardLeaderboard.innerHTML = "";
     } else {
         dashboardEmpty.classList.add("hidden");
-        dashboardLeaderboard.innerHTML = "";
+
         filtered.slice(0, 8).forEach(function (player, index) {
             const row = document.createElement("div");
             row.classList.add("leaderboard-row");
-            row.innerHTML = `
-                <div class="player-name">
-                    <span class="player-place">#${index + 1}</span>
-                    <strong>${player.name}</strong>
-                </div>
-                <span class="player-score">${player.score} pts</span>
-            `;
+
+            const nameContainer = document.createElement("div");
+            nameContainer.classList.add("player-name");
+
+            const place = document.createElement("span");
+            place.classList.add("player-place");
+            place.textContent = "#" + (index + 1);
+
+            const name = document.createElement("strong");
+            name.textContent = player.name;
+
+            const playerScore = document.createElement("span");
+            playerScore.classList.add("player-score");
+            playerScore.textContent = player.score + " pts";
+
+            nameContainer.appendChild(place);
+            nameContainer.appendChild(name);
+            row.appendChild(nameContainer);
+            row.appendChild(playerScore);
+
             dashboardLeaderboard.appendChild(row);
         });
     }
@@ -463,39 +534,56 @@ function renderDashboard() {
     const completedCount = participants.filter(function (person) {
         return person.status === "Completed" || person.score >= 5;
     }).length;
+
     const playingCount = participants.filter(function (person) {
         return person.status === "Playing";
     }).length;
 
-    statTotal.textContent    = participants.length;
-    statPlaying.textContent  = playingCount;
+    statTotal.textContent = participants.length;
+    statPlaying.textContent = playingCount;
     statCompleted.textContent = completedCount;
 
-    const activityItems = filtered.length ? filtered.slice(0, 5) : participants.slice(0, 5);
+    const activityItems = filtered.length
+        ? filtered.slice(0, 5)
+        : [];
 
     dashboardActivity.innerHTML = "";
+
     if (activityItems.length === 0) {
         dashboardActivityEmpty.classList.remove("hidden");
         return;
     }
 
     dashboardActivityEmpty.classList.add("hidden");
+
     activityItems.forEach(function (player) {
         const item = document.createElement("div");
         item.classList.add("activity-row");
-        item.innerHTML = `
-            <div>
-                <strong>${player.name}</strong>
-                <div class="activity-meta">Status: ${player.status} • ${player.challenge}</div>
-            </div>
-            <div class="player-score">${player.score} pts</div>
-        `;
+
+        const details = document.createElement("div");
+
+        const name = document.createElement("strong");
+        name.textContent = player.name;
+
+        const meta = document.createElement("div");
+        meta.classList.add("activity-meta");
+        meta.textContent =
+            "Status: " + player.status + " • " + player.challenge;
+
+        const playerScore = document.createElement("div");
+        playerScore.classList.add("player-score");
+        playerScore.textContent = player.score + " pts";
+
+        details.appendChild(name);
+        details.appendChild(meta);
+        item.appendChild(details);
+        item.appendChild(playerScore);
+
         dashboardActivity.appendChild(item);
     });
 }
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
-
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const randomIndex = Math.floor(Math.random() * (i + 1));
@@ -504,7 +592,6 @@ function shuffleArray(array) {
 }
 
 // ── Initialise ────────────────────────────────────────────────────────────────
-
 showScreen("welcome");
 showLeaderboard();
 renderDashboard();
