@@ -11,7 +11,14 @@ let players = [];
 function load() {
   questions = JSON.parse(fs.readFileSync(path.join(dataDir, 'questions.json'), 'utf8'));
   qrCodes = JSON.parse(fs.readFileSync(path.join(dataDir, 'qrcodes.json'), 'utf8'));
-  players = JSON.parse(fs.readFileSync(path.join(dataDir, 'players.json'), 'utf8'));
+
+  const playersPath = path.join(dataDir, 'players.json');
+  if (fs.existsSync(playersPath)) {
+    players = JSON.parse(fs.readFileSync(playersPath, 'utf8'));
+  } else {
+    players = [];
+    fs.writeFileSync(playersPath, JSON.stringify(players, null, 2));
+  }
 }
 
 function save() {
