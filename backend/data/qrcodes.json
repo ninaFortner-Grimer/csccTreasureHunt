@@ -2,26 +2,26 @@
   {
     "id": "QR-01",
     "secret": "CSCC-LAB-7K2P",
-    "clue": "Find me where students wait before entering the lab."
+    "clue": "Find me where students wait before entering the laboratory."
   },
   {
     "id": "QR-02",
-    "secret": "CSCC-ENTRY-9M4R",
-    "clue": "I'm hiding near the department entrance."
+    "secret": "CSCC-ENT-9M4X",
+    "clue": "I'm hiding near the department entrance. Can you find me?"
   },
   {
     "id": "QR-03",
-    "secret": "CSCC-BOARD-5T8W",
-    "clue": "Look where printed schedules and announcements are posted."
+    "secret": "CSCC-NOT-3W8Y",
+    "clue": "Look where schedules and announcements are posted."
   },
   {
     "id": "QR-04",
-    "secret": "CSCC-LIBRARY-3N6X",
-    "clue": "Find me near a place where students study quietly."
+    "secret": "CSCC-TD-5R1Z",
+    "clue": "You'll find me where students gather to learn and gain knowledge."
   },
   {
     "id": "QR-05",
-    "secret": "CSCC-ROBOTICS-8J2V",
-    "clue": "Look near the place where technology projects come to life."
+    "secret": "CSCC-SOC-2L6V",
+    "clue": "You'll find me where students learn new things, explore their interests, and have fun doing what they love."
   }
 ]

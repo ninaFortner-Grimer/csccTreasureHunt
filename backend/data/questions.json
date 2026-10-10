@@ -1,62 +1,177 @@
 [
   {
     "id": 1,
-    "text": "What does CPU stand for?",
+    "category": "Basic CS",
+    "text": "What does CPU stand for in computer hardware?",
     "choices": ["Central Processing Unit", "Computer Personal Unit", "Central Program Unit", "Core Processing Unit"],
     "answer": "Central Processing Unit"
   },
   {
     "id": 2,
-    "text": "Which of these is a programming language?",
-    "choices": ["Python", "HTML", "Windows", "Chrome"],
-    "answer": "Python"
+    "category": "Basic CS",
+    "text": "What is the binary representation of the decimal number 5?",
+    "choices": ["101", "110", "011", "111"],
+    "answer": "101"
   },
   {
     "id": 3,
+    "category": "Basic CS",
     "text": "What does RAM stand for?",
     "choices": ["Random Access Memory", "Read Access Module", "Rapid Active Memory", "Run And Manage"],
     "answer": "Random Access Memory"
   },
   {
     "id": 4,
-    "text": "What is the binary representation of the number 5?",
-    "choices": ["101", "110", "011", "111"],
-    "answer": "101"
+    "category": "Basic CS",
+    "text": "Which component is considered the 'brain' of the computer?",
+    "choices": ["CPU", "Hard Drive", "RAM", "Graphics Card"],
+    "answer": "CPU"
   },
   {
     "id": 5,
-    "text": "Which protocol is used to load secure websites?",
-    "choices": ["HTTPS", "FTP", "SMTP", "SSH"],
-    "answer": "HTTPS"
+    "category": "Programming",
+    "text": "Which symbol starts a single-line comment in JavaScript?",
+    "choices": ["//", "#", "<!--", "--"],
+    "answer": "//"
   },
   {
     "id": 6,
-    "text": "Which device is used to connect a computer to a network?",
-    "choices": ["Network card", "Sound card", "Graphics card", "Power supply"],
-    "answer": "Network card"
+    "category": "Programming",
+    "text": "What type of data structure uses First-In, First-Out (FIFO) ordering?",
+    "choices": ["Queue", "Stack", "Tree", "Graph"],
+    "answer": "Queue"
   },
   {
     "id": 7,
+    "category": "Programming",
+    "text": "Which keyword is used to declare a block-scoped variable in modern JavaScript?",
+    "choices": ["let", "var", "def", "dim"],
+    "answer": "let"
+  },
+  {
+    "id": 8,
+    "category": "Programming",
+    "text": "What is the output of `3 + 2 + '5'` in JavaScript?",
+    "choices": ["'55'", "10", "'325'", "Error"],
+    "answer": "'55'"
+  },
+  {
+    "id": 9,
+    "category": "Web Development",
     "text": "What does HTML stand for?",
     "choices": ["HyperText Markup Language", "High Tech Modern Language", "HyperText Machine Language", "Home Tool Markup Language"],
     "answer": "HyperText Markup Language"
   },
   {
-    "id": 8,
-    "text": "Which of these is a strong password?",
-    "choices": ["T!9x#Lq2$vP", "123456", "password", "azerty"],
-    "answer": "T!9x#Lq2$vP"
-  },
-  {
-    "id": 9,
-    "text": "What is the main purpose of a firewall?",
-    "choices": ["Block unauthorized network traffic", "Speed up the internet", "Store files", "Cool the CPU"],
-    "answer": "Block unauthorized network traffic"
-  },
-  {
     "id": 10,
-    "text": "Which symbol starts a single-line comment in JavaScript?",
-    "choices": ["//", "#", "<!--", "--"],
-    "answer": "//"
+    "category": "Web Development",
+    "text": "Which CSS property is used to change the text color of an element?",
+    "choices": ["color", "text-color", "font-color", "background-color"],
+    "answer": "color"
+  },
+  {
+    "id": 11,
+    "category": "Web Development",
+    "text": "Which HTTP status code indicates 'Not Found'?",
+    "choices": ["404", "200", "500", "301"],
+    "answer": "404"
+  },
+  {
+    "id": 12,
+    "category": "Web Development",
+    "text": "Which HTML tag is used to embed an image in a web page?",
+    "choices": ["<img>", "<image>", "<picture>", "<src>"],
+    "answer": "<img>"
+  },
+  {
+    "id": 13,
+    "category": "Networking & Cybersecurity",
+    "text": "Which protocol is used to secure web traffic with encryption?",
+    "choices": ["HTTPS", "HTTP", "FTP", "SMTP"],
+    "answer": "HTTPS"
+  },
+  {
+    "id": 14,
+    "category": "Networking & Cybersecurity",
+    "text": "What is the primary role of a network router?",
+    "choices": ["Direct data packets between networks", "Store website files", "Compile source code", "Display graphics"],
+    "answer": "Direct data packets between networks"
+  },
+  {
+    "id": 15,
+    "category": "Networking & Cybersecurity",
+    "text": "What does an IP address uniquely identify on a network?",
+    "choices": ["A device connection", "A software program", "A user account", "A physical keyboard"],
+    "answer": "A device connection"
+  },
+  {
+    "id": 16,
+    "category": "Networking & Cybersecurity",
+    "text": "What is the main purpose of a network firewall?",
+    "choices": ["Filter and block unauthorized traffic", "Speed up internet downloads", "Compress big files", "Generate secure passwords"],
+    "answer": "Filter and block unauthorized traffic"
+  },
+  {
+    "id": 17,
+    "category": "Artificial Intelligence",
+    "text": "What is 'Machine Learning' primarily focused on?",
+    "choices": ["Algorithms learning patterns from data", "Building physical computer hardware", "Designing computer monitors", "Writing HTML web pages"],
+    "answer": "Algorithms learning patterns from data"
+  },
+  {
+    "id": 18,
+    "category": "Artificial Intelligence",
+    "text": "What are dataset examples used to teach an AI model called?",
+    "choices": ["Training data", "Output logs", "Binary code", "Syntax errors"],
+    "answer": "Training data"
+  },
+  {
+    "id": 19,
+    "category": "Artificial Intelligence",
+    "text": "Which of these is a common everyday application of AI?",
+    "choices": ["Voice assistants like Siri/Alexa", "Plugging in a power cable", "Turning on a light switch", "Formatting a USB flash drive"],
+    "answer": "Voice assistants like Siri/Alexa"
+  },
+  {
+    "id": 20,
+    "category": "Artificial Intelligence",
+    "text": "What does LLM stand for in artificial intelligence?",
+    "choices": ["Large Language Model", "Linear Logic Machine", "Low Level Memory", "Linked List Module"],
+    "answer": "Large Language Model"
+  },
+  {
+    "id": 21,
+    "category": "Robotics",
+    "text": "Which robot component collects information from the environment?",
+    "choices": ["Sensor", "Actuator", "Chassis", "Gearbox"],
+    "answer": "Sensor"
+  },
+  {
+    "id": 22,
+    "category": "Robotics",
+    "text": "Which component moves or controls a mechanism in a robot?",
+    "choices": ["Actuator / Motor", "Thermometer", "Memory chip", "Power outlet"],
+    "answer": "Actuator / Motor"
+  },
+  {
+    "id": 23,
+    "category": "Robotics",
+    "text": "Which popular open-source microcontroller board is widely used in robotics projects?",
+    "choices": ["Arduino", "Intel Core i9", "Nvidia RTX", "Windows 11"],
+    "answer": "Arduino"
+  },
+  {
+    "id": 24,
+    "category": "Robotics",
+    "text": "What is the basic sequence of operation in a robotic system?",
+    "choices": ["Input → Processing → Output", "Output → Processing → Input", "Processing → Input → Output", "Input → Output → Processing"],
+    "answer": "Input → Processing → Output"
+  },
+  {
+    "id": 25,
+    "category": "Basic CS",
+    "text": "How many bits are in one byte?",
+    "choices": ["8", "4", "16", "32"],
+    "answer": "8"
   }
 ]

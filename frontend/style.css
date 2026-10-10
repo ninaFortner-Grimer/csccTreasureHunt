@@ -620,19 +620,38 @@ button:focus-visible {
     margin-bottom: 4px;
 }
 
-.demo-label {
-    display: inline-block;
-    margin-top: 12px;
-    padding: 5px 11px;
-    background: rgba(255, 185, 95, 0.08);
+/* ── QR CAMERA READER ─────────────────────────────────────── */
+
+.qr-reader-wrap {
+    margin: 16px 0 8px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
     border: 1px solid var(--gold-border);
-    border-radius: 4px;
-    color: var(--gold);
-    font-family: var(--font-head);
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+}
+
+.qr-reader-wrap #qrReader {
+    width: 100% !important;
+    border: none !important;
+    background: #000;
+}
+
+/* Override html5-qrcode default styles */
+#qrReader video {
+    width: 100% !important;
+    border-radius: 0 !important;
+}
+
+#qrReader img {
+    display: none !important;
+}
+
+.qr-reader-hint {
+    font-size: 0.75rem;
+    color: var(--gray-2);
+    text-align: center;
+    padding: 8px;
+    background: rgba(0,0,0,0.4);
+    margin: 0;
 }
 
 

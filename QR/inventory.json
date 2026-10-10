@@ -1,0 +1,32 @@
+[
+  {
+    "id": "QR-01",
+    "payload": "CSCC:QR-01:CSCC-LAB-7K2P",
+    "clue": "Find me where students wait before entering the laboratory.",
+    "file": "QR-01.png"
+  },
+  {
+    "id": "QR-02",
+    "payload": "CSCC:QR-02:CSCC-ENT-9M4X",
+    "clue": "I'm hiding near the department entrance. Can you find me?",
+    "file": "QR-02.png"
+  },
+  {
+    "id": "QR-03",
+    "payload": "CSCC:QR-03:CSCC-NOT-3W8Y",
+    "clue": "Look where schedules and announcements are posted.",
+    "file": "QR-03.png"
+  },
+  {
+    "id": "QR-04",
+    "payload": "CSCC:QR-04:CSCC-TD-5R1Z",
+    "clue": "You'll find me where students gather to learn and gain knowledge.",
+    "file": "QR-04.png"
+  },
+  {
+    "id": "QR-05",
+    "payload": "CSCC:QR-05:CSCC-SOC-2L6V",
+    "clue": "You'll find me where students learn new things, explore their interests, and have fun doing what they love.",
+    "file": "QR-05.png"
+  }
+]
