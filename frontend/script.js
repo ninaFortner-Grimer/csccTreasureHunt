@@ -1,45 +1,57 @@
 
-const API = "http://localhost:3000/api";
-const TOTAL = 5;
+/* =============================================================
+   CSCC Treasure Hunt — Frontend Application
+   Connects to the Express backend API.
+   ============================================================= */
 
+// ── Configuration ─────────────────────────────────────────────
+// In production, replace with your deployed backend URL.
+// During local development: http://localhost:3000/api
+const API = (window.CSCC_API_BASE || "http://localhost:3000") + "/api";
+const TOTAL = 5; // total QR checkpoints
+
+// ── State ──────────────────────────────────────────────────────
 let playerName = "";
 let token = "";
 let score = 0;
 let currentQuestion = null;
 let busy = false;
+let qrScanner = null;
 
+// ── DOM Helpers ────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
-const welcomeScreen = $("welcomeScreen");
-const nicknameScreen = $("nicknameScreen");
-const gameScreen = $("gameScreen");
-const endScreen = $("endScreen");
-const dashboardScreen = $("dashboardScreen");
+const welcomeScreen    = $("welcomeScreen");
+const nicknameScreen   = $("nicknameScreen");
+const gameScreen       = $("gameScreen");
+const endScreen        = $("endScreen");
+const dashboardScreen  = $("dashboardScreen");
 
-const playerNameInput = $("playerName");
-const startButton = $("startButton");
-const beginButton = $("beginButton");
-const backToLanding = $("backToLanding");
-const startError = $("startError");
-const displayName = $("displayName");
-const scoreDisplay = $("score");
-const questionElement = $("question");
-const answers = $("answers");
-const feedback = $("feedback");
-const questionNumber = $("questionNumber");
-const clueCard = $("clueCard");
-const clueText = $("clueText");
-const findQrButton = $("findQrButton");
-const qrCard = $("qrCard");
-const scanButton = $("scanButton");
-const qrFeedback = $("qrFeedback");
-const nextButton = $("nextButton");
-const progressBar = $("progressBar");
-const finalScore = $("finalScore");
-const finalMessage = $("finalMessage");
-const leaderboard = $("leaderboard");
-const restartButton = $("restartButton");
+const playerNameInput  = $("playerName");
+const startButton      = $("startButton");
+const beginButton      = $("beginButton");
+const backToLanding    = $("backToLanding");
+const startError       = $("startError");
+const displayName      = $("displayName");
+const scoreDisplay     = $("score");
+const questionElement  = $("question");
+const answers          = $("answers");
+const feedback         = $("feedback");
+const questionNumber   = $("questionNumber");
+const clueCard         = $("clueCard");
+const clueText         = $("clueText");
+const findQrButton     = $("findQrButton");
+const qrCard           = $("qrCard");
+const scanButton       = $("scanButton");
+const qrFeedback       = $("qrFeedback");
+const nextButton       = $("nextButton");
+const progressBar      = $("progressBar");
+const finalScore       = $("finalScore");
+const finalMessage     = $("finalMessage");
+const leaderboard      = $("leaderboard");
+const restartButton    = $("restartButton");
 
+// ── API Helper ─────────────────────────────────────────────────
 async function api(path, options = {}) {
     const headers = {
         "Content-Type": "application/json",
@@ -49,57 +61,51 @@ async function api(path, options = {}) {
     if (token) headers["x-player-token"] = token;
 
     let response;
-
     try {
-        response = await fetch(API + path, {
-            ...options,
-            headers
-        });
+        response = await fetch(API + path, { ...options, headers });
     } catch {
-        throw new Error("Cannot connect to the backend. Keep npm start running.");
+        throw new Error("Cannot reach the server. Make sure the backend is running.");
     }
 
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        throw new Error(data.error || "Request failed.");
+        throw new Error(data.error || `Request failed (${response.status})`);
     }
 
     return data;
 }
 
+// ── Screen Management ──────────────────────────────────────────
 function showScreen(name) {
-    [
-        welcomeScreen,
-        nicknameScreen,
-        gameScreen,
-        endScreen,
-        dashboardScreen
-    ].forEach(screen => screen?.classList.remove("active"));
+    [welcomeScreen, nicknameScreen, gameScreen, endScreen, dashboardScreen]
+        .forEach(s => s?.classList.remove("active"));
 
-    const screens = {
-        welcome: welcomeScreen,
-        nickname: nicknameScreen,
-        game: gameScreen,
-        end: endScreen,
+    const map = {
+        welcome:   welcomeScreen,
+        nickname:  nicknameScreen,
+        game:      gameScreen,
+        end:       endScreen,
         dashboard: dashboardScreen
     };
 
-    screens[name]?.classList.add("active");
+    map[name]?.classList.add("active");
 }
 
+// ── Utility ────────────────────────────────────────────────────
 function message(element, text, color = "") {
     if (!element) return;
     element.textContent = text;
-    if (color) element.style.color = color;
+    element.style.color = color || "";
 }
 
 function setBusy(value) {
     busy = value;
     if (beginButton) beginButton.disabled = value;
-    if (scanButton) scanButton.disabled = value;
+    if (scanButton)  scanButton.disabled  = value;
 }
 
+// ── Navigation Listeners ───────────────────────────────────────
 startButton?.addEventListener("click", event => {
     event.preventDefault();
     showScreen("nickname");
@@ -129,32 +135,34 @@ findQrButton?.addEventListener("click", event => {
     clueCard?.classList.add("hidden");
     qrCard?.classList.remove("hidden");
     message(qrFeedback, "");
+    // Show scanner UI when player reaches checkpoint card
+    startQrScanner();
 });
 
 scanButton?.addEventListener("click", event => {
     event.preventDefault();
-    scanCheckpoint();
+    // Manual fallback — prompt for code+secret
+    scanCheckpointManual();
 });
 
 nextButton?.addEventListener("click", async event => {
     event.preventDefault();
     if (busy) return;
 
-    if (score >= TOTAL) {
-        await endGame();
-    } else {
-        await loadQuestion();
-    }
+    stopQrScanner();
+    nextButton.classList.add("hidden");
+    await loadQuestion();
 });
 
 restartButton?.addEventListener("click", () => {
+    stopQrScanner();
     token = "";
     playerName = "";
     score = 0;
     currentQuestion = null;
 
     if (playerNameInput) playerNameInput.value = "";
-    if (progressBar) progressBar.style.width = "0%";
+    if (progressBar)     progressBar.style.width = "0%";
 
     message(startError, "");
     showScreen("welcome");
@@ -177,13 +185,20 @@ $("dashboardToggleBack")?.addEventListener("click", () => {
 $("dashboardRefresh")?.addEventListener("click", renderDashboard);
 $("dashboardSearch")?.addEventListener("input", renderDashboard);
 
+// ── Player Registration ────────────────────────────────────────
 async function startGame() {
     if (busy) return;
 
     const name = (playerNameInput?.value || "").trim();
 
-    if (name.length < 2 || name.length > 30) {
-        message(startError, "Enter a nickname between 2 and 30 characters.");
+    // Nickname validation — mirrors backend rule
+    const NICKNAME_REGEX = /^[A-Za-z0-9 \-_'.]{2,30}$/;
+    if (!NICKNAME_REGEX.test(name)) {
+        message(
+            startError,
+            "Nickname must be 2–30 characters. Allowed: letters, numbers, spaces, hyphens, apostrophes, underscores.",
+            "#f87171"
+        );
         playerNameInput?.focus();
         return;
     }
@@ -192,14 +207,13 @@ async function startGame() {
     message(startError, "");
 
     try {
-        console.log("START GAME: sending nickname");
+        console.log("[CSCC] Registering player…");
         const player = await api("/player", {
             method: "POST",
             body: JSON.stringify({ name })
         });
 
         playerName = player.name;
-        console.log("PLAYER CREATED:", player);
         token = player.token;
         score = 0;
 
@@ -207,9 +221,11 @@ async function startGame() {
         if (scoreDisplay) scoreDisplay.textContent = "0";
         if (progressBar) progressBar.style.width = "0%";
 
+        console.log("[CSCC] Player registered, entering game.");
         showScreen("game");
         await loadQuestion();
     } catch (error) {
+        console.error("[CSCC] Registration failed:", error.message);
         showScreen("nickname");
         message(startError, error.message, "#f87171");
     } finally {
@@ -217,6 +233,7 @@ async function startGame() {
     }
 }
 
+// ── Game Flow ──────────────────────────────────────────────────
 async function loadQuestion() {
     setBusy(true);
     resetRound();
@@ -232,9 +249,10 @@ async function loadQuestion() {
         }
 
         if (data.state === "waiting_scan") {
-            message(feedback, "Correct answer! Find your checkpoint.");
+            message(feedback, "You already answered correctly! Find your checkpoint.", "");
             message(clueText, data.clue || "Find your assigned checkpoint.");
             clueCard?.classList.remove("hidden");
+            setBusy(false);
             return;
         }
 
@@ -249,6 +267,7 @@ async function loadQuestion() {
         updateProgress();
         createAnswerButtons(data.choices || []);
     } catch (error) {
+        console.error("[CSCC] loadQuestion error:", error.message);
         message(feedback, error.message, "#f87171");
     } finally {
         setBusy(false);
@@ -265,9 +284,7 @@ function createAnswerButtons(choices) {
         button.type = "button";
         button.textContent = answer;
         button.classList.add("answer-button");
-
         button.addEventListener("click", () => checkAnswer(answer, button));
-
         answers.appendChild(button);
     });
 }
@@ -276,10 +293,7 @@ async function checkAnswer(answer, button) {
     if (busy || !currentQuestion) return;
 
     setBusy(true);
-
-    document.querySelectorAll(".answer-button").forEach(item => {
-        item.disabled = true;
-    });
+    document.querySelectorAll(".answer-button").forEach(b => { b.disabled = true; });
 
     try {
         const result = await api("/challenge/answer", {
@@ -289,81 +303,157 @@ async function checkAnswer(answer, button) {
 
         if (result.correct) {
             button.classList.add("correct");
-            message(feedback, "Correct! Follow the clue below.", "#4ade80");
+            message(feedback, "✓ Correct! Follow the clue to find your checkpoint.", "#4ade80");
             message(clueText, result.clue || "Find your assigned checkpoint.");
             clueCard?.classList.remove("hidden");
         } else {
             button.classList.add("wrong");
-            message(feedback, "Incorrect answer. Try the next question.", "#f87171");
+            message(feedback, "✗ Incorrect. You'll get a new question.", "#f87171");
             currentQuestion = null;
 
             window.setTimeout(() => {
                 loadQuestion();
-            }, 1000);
+            }, 1200);
         }
     } catch (error) {
+        console.error("[CSCC] checkAnswer error:", error.message);
         message(feedback, error.message, "#f87171");
-
-        document.querySelectorAll(".answer-button").forEach(item => {
-            item.disabled = false;
-        });
+        document.querySelectorAll(".answer-button").forEach(b => { b.disabled = false; });
     } finally {
         setBusy(false);
     }
 }
 
-async function scanCheckpoint() {
+// ── QR Scanning ────────────────────────────────────────────────
+function startQrScanner() {
+    // Check if the library is loaded
+    if (typeof Html5Qrcode === "undefined") {
+        // Library not available — show manual fallback UI only
+        showManualScanFallback();
+        return;
+    }
+
+    const container = $("qrReaderContainer");
+    if (!container) return;
+
+    container.classList.remove("hidden");
+
+    // Don't start a new scanner if one is running
+    if (qrScanner) return;
+
+    qrScanner = new Html5Qrcode("qrReader");
+
+    const config = {
+        fps: 10,
+        qrbox: { width: 220, height: 220 },
+        aspectRatio: 1.0,
+    };
+
+    qrScanner.start(
+        { facingMode: "environment" },
+        config,
+        (decodedText) => {
+            // QR code scanned — parse and submit
+            console.log("[CSCC] QR scanned:", decodedText);
+            stopQrScanner();
+            handleQrPayload(decodedText);
+        },
+        (errorMessage) => {
+            // Scanning error (normal during scan, not user-facing)
+        }
+    ).catch(err => {
+        console.warn("[CSCC] Camera start failed:", err);
+        stopQrScanner();
+        showManualScanFallback();
+    });
+}
+
+function stopQrScanner() {
+    if (qrScanner) {
+        qrScanner.stop().catch(() => {});
+        qrScanner = null;
+    }
+    const container = $("qrReaderContainer");
+    if (container) container.classList.add("hidden");
+}
+
+function showManualScanFallback() {
+    const fallback = $("manualScanFallback");
+    if (fallback) fallback.classList.remove("hidden");
+}
+
+async function handleQrPayload(payload) {
+    // QR payload format: CSCC:code:secret
+    // Example: CSCC:QR-01:CSCC-LAB-7K2P
+    const parts = payload.trim().split(":");
+    if (parts.length >= 3 && parts[0] === "CSCC") {
+        const code = parts[1];
+        const secret = parts.slice(2).join(":");
+        await submitQrScan(code, secret);
+    } else {
+        message(qrFeedback, "Invalid QR code. Please scan the correct checkpoint.", "#f87171");
+    }
+}
+
+function scanCheckpointManual() {
     if (busy) return;
 
-    const code = window.prompt("Enter your checkpoint ID (example: QR-01):");
+    const code = window.prompt("Enter checkpoint ID (e.g. QR-01):");
     if (code === null) return;
 
     const secret = window.prompt("Enter the checkpoint secret:");
     if (secret === null) return;
 
+    submitQrScan(code.trim(), secret.trim());
+}
+
+async function submitQrScan(code, secret) {
+    if (busy) return;
+
     setBusy(true);
-    message(qrFeedback, "Checking checkpoint...");
+    message(qrFeedback, "Verifying checkpoint…");
 
     try {
         const result = await api("/qr/scan", {
             method: "POST",
-            body: JSON.stringify({
-                code: code.trim(),
-                secret: secret.trim()
-            })
+            body: JSON.stringify({ code, secret })
         });
 
         score = Number(result.score ?? score);
         updateProgress();
 
-        message(
-            qrFeedback,
-            result.finished
-                ? "Checkpoint accepted! Hunt completed!"
-                : "Checkpoint accepted! You earned a point!",
-            "#4ade80"
-        );
+        const msg = result.finished
+            ? "🎉 All checkpoints found! The hunt is complete!"
+            : "✓ Checkpoint accepted! +1 point earned.";
 
+        message(qrFeedback, msg, "#4ade80");
         nextButton?.classList.remove("hidden");
 
         if (nextButton) {
             nextButton.textContent = result.finished
-                ? "FINISH THE HUNT"
+                ? "VIEW YOUR RESULTS →"
                 : "CONTINUE THE HUNT →";
         }
 
-        await showLeaderboard();
+        // Pre-load leaderboard in background
+        showLeaderboard().catch(() => {});
     } catch (error) {
+        console.error("[CSCC] QR scan error:", error.message);
         message(qrFeedback, error.message, "#f87171");
     } finally {
         setBusy(false);
     }
 }
 
+// ── Round Reset ────────────────────────────────────────────────
 function resetRound() {
     clueCard?.classList.add("hidden");
     qrCard?.classList.add("hidden");
     nextButton?.classList.add("hidden");
+    stopQrScanner();
+
+    const fallback = $("manualScanFallback");
+    if (fallback) fallback.classList.add("hidden");
 
     message(feedback, "");
     message(qrFeedback, "");
@@ -375,7 +465,7 @@ function updateProgress() {
     if (scoreDisplay) scoreDisplay.textContent = String(score);
 
     if (progressBar) {
-        progressBar.style.width = `${Math.min(score / TOTAL * 100, 100)}%`;
+        progressBar.style.width = `${Math.min((score / TOTAL) * 100, 100)}%`;
     }
 
     if (questionNumber) {
@@ -383,6 +473,7 @@ function updateProgress() {
     }
 }
 
+// ── End Game ───────────────────────────────────────────────────
 async function endGame() {
     showScreen("end");
 
@@ -393,20 +484,23 @@ async function endGame() {
 
     if (finalMessage) {
         finalMessage.textContent =
-            `You completed the hunt with ${score} out of ${TOTAL} checkpoints.`;
+            score >= TOTAL
+                ? `Outstanding! You found all ${TOTAL} checkpoints!`
+                : `You completed the hunt with ${score} out of ${TOTAL} checkpoints.`;
     }
 
     await showLeaderboard();
     await renderDashboard();
 }
 
+// ── Leaderboard ────────────────────────────────────────────────
 function renderRows(container, players) {
     if (!container) return;
 
     container.innerHTML = "";
 
     if (!players.length) {
-        container.innerHTML = '<div class="empty-state">No scores recorded yet.</div>';
+        container.innerHTML = '<div class="empty-state">No scores yet.</div>';
         return;
     }
 
@@ -426,7 +520,7 @@ function renderRows(container, players) {
 
         const points = document.createElement("span");
         points.classList.add("player-score");
-        points.textContent = `${player.score} pts`;
+        points.textContent = `${player.score} pts${player.finished ? " ✓" : ""}`;
 
         nameContainer.append(place, name);
         row.append(nameContainer, points);
@@ -439,10 +533,13 @@ async function showLeaderboard() {
         const players = await api("/leaderboard");
         renderRows(leaderboard, players);
     } catch (error) {
-        if (leaderboard) leaderboard.textContent = error.message;
+        if (leaderboard) {
+            leaderboard.innerHTML = `<div class="empty-state">${error.message}</div>`;
+        }
     }
 }
 
+// ── Organizer Dashboard ────────────────────────────────────────
 async function renderDashboard() {
     const container = $("dashboardLeaderboard");
     if (!container) return;
@@ -451,53 +548,62 @@ async function renderDashboard() {
         const players = await api("/leaderboard");
         const query = ($("dashboardSearch")?.value || "").trim().toLowerCase();
 
-        const filtered = players.filter(player =>
-            player.name.toLowerCase().includes(query)
+        const filtered = players.filter(p =>
+            p.name.toLowerCase().includes(query)
         );
 
         renderRows(container, filtered);
 
         $("dashboardEmpty")?.classList.toggle("hidden", filtered.length > 0);
 
-        const completed = players.filter(player => player.finished).length;
+        const completed = players.filter(p => p.finished).length;
 
-        if ($("statTotal")) $("statTotal").textContent = String(players.length);
+        if ($("statTotal"))     $("statTotal").textContent     = String(players.length);
         if ($("statCompleted")) $("statCompleted").textContent = String(completed);
-        if ($("statPlaying")) $("statPlaying").textContent = String(players.length - completed);
+        if ($("statPlaying"))   $("statPlaying").textContent   = String(players.length - completed);
 
         const activity = $("dashboardActivity");
 
         if (activity) {
             activity.innerHTML = "";
 
-            filtered.slice(0, 5).forEach(player => {
-                const item = document.createElement("div");
-                item.classList.add("activity-row");
+            if (filtered.length === 0) {
+                $("dashboardActivityEmpty")?.classList.remove("hidden");
+            } else {
+                $("dashboardActivityEmpty")?.classList.add("hidden");
 
-                const details = document.createElement("div");
-                const name = document.createElement("strong");
-                name.textContent = player.name;
+                filtered.slice(0, 10).forEach(player => {
+                    const item = document.createElement("div");
+                    item.classList.add("activity-row");
 
-                const status = document.createElement("div");
-                status.classList.add("activity-meta");
-                status.textContent = player.finished ? "Status: Completed" : "Status: Playing";
+                    const details = document.createElement("div");
+                    const name = document.createElement("strong");
+                    name.textContent = player.name;
 
-                details.append(name, status);
+                    const status = document.createElement("div");
+                    status.classList.add("activity-meta");
+                    status.textContent = player.finished
+                        ? `Completed · ${player.score} pts`
+                        : `Playing · ${player.score} pts`;
 
-                const points = document.createElement("div");
-                points.classList.add("player-score");
-                points.textContent = `${player.score} pts`;
+                    details.append(name, status);
 
-                item.append(details, points);
-                activity.appendChild(item);
-            });
+                    const pts = document.createElement("div");
+                    pts.classList.add("player-score");
+                    pts.textContent = player.finished ? "✓ Done" : "In progress";
+
+                    item.append(details, pts);
+                    activity.appendChild(item);
+                });
+            }
         }
-
-        $("dashboardActivityEmpty")?.classList.toggle("hidden", filtered.length > 0);
     } catch (error) {
-        container.textContent = error.message;
+        container.innerHTML = `<div class="empty-state">${error.message}</div>`;
     }
 }
 
+// ── Init ───────────────────────────────────────────────────────
 showScreen("welcome");
-showLeaderboard();
+
+// Silently pre-warm leaderboard (backend may be offline during dev)
+showLeaderboard().catch(() => {});

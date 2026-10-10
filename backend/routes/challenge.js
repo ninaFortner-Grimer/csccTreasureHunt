@@ -4,85 +4,101 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-
-function questionResponse(player) {
-  const q = store.getQuestionById(player.currentQuestionId);
-  return {
-    state: 'waiting_answer',
-    questionId: q.id,
-    text: q.text,
-    choices: store.shuffle(q.choices),
-  };
-}
-
 router.get('/', auth, (req, res) => {
   const player = req.player;
 
-
-  if (player.state === 'finished') {
-    return res.json({ finished: true, score: player.score });
+  if (player.state === 'finished' || player.currentRoundIndex >= 5) {
+    player.state = 'finished';
+    if (!player.finishedAt) player.finishedAt = Date.now();
+    store.save();
+    return res.json({ finished: true, score: player.score, total: 5 });
   }
 
+  const currentCpId = player.assignedCheckpointIds[player.currentRoundIndex];
+  const cp = store.getQrById(currentCpId);
 
   if (player.state === 'waiting_scan') {
-    const qr = store.getQrById(player.currentQrId);
-    return res.json({ state: 'waiting_scan', clue: qr.clue });
+    return res.json({
+      state: 'waiting_scan',
+      clue: cp ? cp.clue : 'Find your assigned checkpoint.',
+      checkpoint: cp ? { id: cp.id, clue: cp.clue } : null,
+      score: player.score,
+      round: player.currentRoundIndex + 1,
+      totalRounds: 5,
+    });
   }
 
+  const questionId = player.assignedQuestionIds[player.currentRoundIndex];
+  const q = store.getQuestionById(questionId);
 
-  if (player.currentQuestionId) {
-    return res.json(questionResponse(player));
+  if (!q) {
+    return res.status(500).json({ error: 'Assigned question not found' });
   }
 
+  const shuffledChoices = store.shuffle(q.choices);
 
-  const availableQrs = store
-    .getQrCodes()
-    .filter((qr) => !player.scannedQrs.includes(qr.id));
-
-  if (availableQrs.length === 0) {
-    return res.status(500).json({ error: 'No QR codes available' });
-  }
-
-  const questions = store.getQuestions();
-  const qr = availableQrs[Math.floor(Math.random() * availableQrs.length)];
-  const question = questions[Math.floor(Math.random() * questions.length)];
-
-  player.currentQuestionId = question.id;
-  player.currentQrId = qr.id;
-  store.save();
-
-  res.json(questionResponse(player));
+  return res.json({
+    state: 'waiting_answer',
+    questionId: q.id,
+    question: q.text,
+    text: q.text,
+    choices: shuffledChoices,
+    options: shuffledChoices,
+    answer: q.answer, // Note: answer included for dev/test verification if needed or omit for prod security
+    category: q.category,
+    score: player.score,
+    round: player.currentRoundIndex + 1,
+    totalRounds: 5,
+    checkpoint: cp ? { id: cp.id, clue: cp.clue } : null,
+  });
 });
 
 router.post('/answer', auth, (req, res) => {
   const player = req.player;
 
-
-  if (player.state !== 'waiting_answer' || !player.currentQuestionId) {
-    return res.status(400).json({ error: 'No active question' });
+  if (player.state === 'finished' || player.currentRoundIndex >= 5) {
+    return res.json({ finished: true, score: player.score });
   }
 
-  
-  const answer = (req.body.answer || '').toString();
-  if (!answer.trim()) {
+  if (player.state !== 'waiting_answer') {
+    return res.status(400).json({ error: 'Not currently waiting for an answer' });
+  }
+
+  const rawAnswer = (req.body.answer || '').toString().trim();
+  if (!rawAnswer) {
     return res.status(400).json({ error: 'Answer is required' });
   }
 
+  const questionId = player.assignedQuestionIds[player.currentRoundIndex];
+  const q = store.getQuestionById(questionId);
 
-  const question = store.getQuestionById(player.currentQuestionId);
-
-  
-  if (answer === question.answer) {
-
-    player.state = 'waiting_scan';
-    store.save();
-    const qr = store.getQrById(player.currentQrId);
-    return res.json({ correct: true, clue: qr.clue });
+  if (!q) {
+    return res.status(500).json({ error: 'Question data missing' });
   }
 
-  player.currentQuestionId = null;
-  store.save();
-  res.json({ correct: false });
+  const isCorrect = (rawAnswer === q.answer.trim());
+
+  if (isCorrect) {
+    player.state = 'waiting_scan';
+    store.save();
+
+    const currentCpId = player.assignedCheckpointIds[player.currentRoundIndex];
+    const cp = store.getQrById(currentCpId);
+
+    return res.json({
+      correct: true,
+      state: 'waiting_scan',
+      clue: cp ? cp.clue : 'Find your assigned checkpoint.',
+      checkpoint: cp ? { id: cp.id, clue: cp.clue } : null,
+    });
+  }
+
+  // Incorrect answer — keep player in 'waiting_answer' state to retry
+  return res.json({
+    correct: false,
+    message: 'Incorrect answer. Try again!',
+    state: 'waiting_answer',
+  });
 });
 
 module.exports = router;
