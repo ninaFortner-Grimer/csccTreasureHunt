@@ -1,436 +1,416 @@
 
-// CSCC Treasure Hunt — Welcome Day 2026
-// Frontend prototype. Quiz logic and scoring run client-side.
-// Backend integration can be connected when the backend is ready.
+const API = "http://localhost:3000/api";
+const TOTAL = 5;
 
-// ── Question Bank ─────────────────────────────────────────────────────────────
-const questions = [
-    {
-        question: "What does CPU stand for?",
-        answers: [
-            "Central Processing Unit",
-            "Computer Personal Unit",
-            "Central Program Utility",
-            "Computer Processing User"
-        ],
-        correct: "Central Processing Unit",
-        clue: "Look for the place where students usually wait before entering a lab.",
-        qr: "QR-01"
-    },
-    {
-        question: "Which language is mainly used to style a webpage?",
-        answers: [
-            "CSS",
-            "Python",
-            "C",
-            "SQL"
-        ],
-        correct: "CSS",
-        clue: "Your next checkpoint is somewhere near a place where people write code.",
-        qr: "QR-02"
-    },
-    {
-        question: "What does HTML stand for?",
-        answers: [
-            "HyperText Markup Language",
-            "HighText Machine Language",
-            "Hyper Transfer Markup Link",
-            "Home Tool Markup Language"
-        ],
-        correct: "HyperText Markup Language",
-        clue: "Search somewhere students can sit, connect their laptops and work.",
-        qr: "QR-03"
-    },
-    {
-        question: "Which data structure follows FIFO?",
-        answers: [
-            "Queue",
-            "Stack",
-            "Tree",
-            "Graph"
-        ],
-        correct: "Queue",
-        clue: "Your QR is hiding somewhere close to a door.",
-        qr: "QR-04"
-    },
-    {
-        question: "Which symbol is used for a single-line comment in JavaScript?",
-        answers: [
-            "//",
-            "/*",
-            "#",
-            "<!--"
-        ],
-        correct: "//",
-        clue: "Check a place where information is usually displayed to students.",
-        qr: "QR-05"
-    }
-];
-
-// ── Demo Participants ─────────────────────────────────────────────────────────
-const demoParticipants = [
-    { name: "Ava", score: 2, status: "Playing", challenge: "Question 3", checkpoint: "QR-02" },
-    { name: "Leo", score: 4, status: "Playing", challenge: "Question 5", checkpoint: "QR-05" },
-    { name: "Maya", score: 1, status: "Playing", challenge: "Question 2", checkpoint: "QR-02" },
-    { name: "Jules", score: 5, status: "Completed", challenge: "Complete", checkpoint: "Finished" },
-    { name: "Riley", score: 3, status: "Playing", challenge: "Question 4", checkpoint: "QR-04" }
-];
-
-// ── State ─────────────────────────────────────────────────────────────────────
 let playerName = "";
+let token = "";
 let score = 0;
 let currentQuestion = null;
-let currentQuestionIndex = 0;
-let usedQuestions = [];
+let busy = false;
 
-const totalQuestions = questions.length;
+const $ = id => document.getElementById(id);
 
-// ── Screen References ─────────────────────────────────────────────────────────
-const welcomeScreen = document.getElementById("welcomeScreen");
-const nicknameScreen = document.getElementById("nicknameScreen");
-const gameScreen = document.getElementById("gameScreen");
-const endScreen = document.getElementById("endScreen");
-const dashboardScreen = document.getElementById("dashboardScreen");
+const welcomeScreen = $("welcomeScreen");
+const nicknameScreen = $("nicknameScreen");
+const gameScreen = $("gameScreen");
+const endScreen = $("endScreen");
+const dashboardScreen = $("dashboardScreen");
 
-// ── UI References ─────────────────────────────────────────────────────────────
-const playerNameInput = document.getElementById("playerName");
-const startButton = document.getElementById("startButton");
-const beginButton = document.getElementById("beginButton");
-const backToLandingBtn = document.getElementById("backToLanding");
-const startError = document.getElementById("startError");
-const displayName = document.getElementById("displayName");
-const scoreDisplay = document.getElementById("score");
-const questionElement = document.getElementById("question");
-const answersContainer = document.getElementById("answers");
-const feedback = document.getElementById("feedback");
-const questionNumber = document.getElementById("questionNumber");
-const clueCard = document.getElementById("clueCard");
-const clueText = document.getElementById("clueText");
-const findQrButton = document.getElementById("findQrButton");
-const qrCard = document.getElementById("qrCard");
-const scanButton = document.getElementById("scanButton");
-const qrFeedback = document.getElementById("qrFeedback");
-const nextButton = document.getElementById("nextButton");
-const progressBar = document.getElementById("progressBar");
-const finalScore = document.getElementById("finalScore");
-const finalMessage = document.getElementById("finalMessage");
-const leaderboard = document.getElementById("leaderboard");
-const restartButton = document.getElementById("restartButton");
-const dashboardToggleWelcome = document.getElementById("dashboardToggleWelcome");
-const dashboardToggleEnd = document.getElementById("dashboardToggleEnd");
-const dashboardToggleBack = document.getElementById("dashboardToggleBack");
-const dashboardSearch = document.getElementById("dashboardSearch");
-const dashboardRefresh = document.getElementById("dashboardRefresh");
-const dashboardLeaderboard = document.getElementById("dashboardLeaderboard");
-const dashboardEmpty = document.getElementById("dashboardEmpty");
-const dashboardActivity = document.getElementById("dashboardActivity");
-const dashboardActivityEmpty = document.getElementById("dashboardActivityEmpty");
-const statTotal = document.getElementById("statTotal");
-const statPlaying = document.getElementById("statPlaying");
-const statCompleted = document.getElementById("statCompleted");
+const playerNameInput = $("playerName");
+const startButton = $("startButton");
+const beginButton = $("beginButton");
+const backToLanding = $("backToLanding");
+const startError = $("startError");
+const displayName = $("displayName");
+const scoreDisplay = $("score");
+const questionElement = $("question");
+const answers = $("answers");
+const feedback = $("feedback");
+const questionNumber = $("questionNumber");
+const clueCard = $("clueCard");
+const clueText = $("clueText");
+const findQrButton = $("findQrButton");
+const qrCard = $("qrCard");
+const scanButton = $("scanButton");
+const qrFeedback = $("qrFeedback");
+const nextButton = $("nextButton");
+const progressBar = $("progressBar");
+const finalScore = $("finalScore");
+const finalMessage = $("finalMessage");
+const leaderboard = $("leaderboard");
+const restartButton = $("restartButton");
 
-// ── Event Listeners ───────────────────────────────────────────────────────────
+async function api(path, options = {}) {
+    const headers = {
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+    };
 
-// Landing CTA → nickname screen
-startButton.addEventListener("click", function () {
-    showScreen("nickname");
-    playerNameInput.focus();
-});
+    if (token) headers["x-player-token"] = token;
 
-// Back button → landing screen
-backToLandingBtn.addEventListener("click", function () {
-    startError.textContent = "";
-    showScreen("welcome");
-});
+    let response;
 
-// Nickname CTA → start game
-beginButton.addEventListener("click", startGame);
-
-// Allow Enter key in nickname input
-playerNameInput.addEventListener("keydown", function (event) {
-    if (event.key === "Enter") {
-        startGame();
-    }
-});
-
-// Show the QR checkpoint demo
-findQrButton.addEventListener("click", function () {
-    clueCard.classList.add("hidden");
-    qrCard.classList.remove("hidden");
-    qrFeedback.textContent = "";
-    qrFeedback.style.color = "";
-});
-
-// Simulate a successful QR scan for the frontend demo
-scanButton.addEventListener("click", function () {
-    if (!currentQuestion || scanButton.disabled) return;
-
-    const checkpoint = currentQuestion.qr;
-
-    qrFeedback.textContent =
-        "Demo checkpoint " + checkpoint + " accepted for this local prototype. " +
-        "Server validation will be required in production.";
-
-    qrFeedback.style.color = "#FFB95F";
-
-    score++;
-    scoreDisplay.textContent = score;
-    scanButton.disabled = true;
-    nextButton.classList.remove("hidden");
-});
-
-// Continue to the next question or finish
-nextButton.addEventListener("click", function () {
-    if (currentQuestionIndex >= totalQuestions) {
-        endGame();
-        return;
+    try {
+        response = await fetch(API + path, {
+            ...options,
+            headers
+        });
+    } catch {
+        throw new Error("Cannot connect to the backend. Keep npm start running.");
     }
 
-    loadQuestion();
-});
+    const data = await response.json().catch(() => ({}));
 
-// Restart the game
-restartButton.addEventListener("click", function () {
-    playerNameInput.value = "";
-    startError.textContent = "";
-    progressBar.style.width = "0%";
-    showScreen("welcome");
-});
+    if (!response.ok) {
+        throw new Error(data.error || "Request failed.");
+    }
 
-// Open organizer dashboard
-dashboardToggleWelcome.addEventListener("click", function () {
-    renderDashboard();
-    showScreen("dashboard");
-});
+    return data;
+}
 
-dashboardToggleEnd.addEventListener("click", function () {
-    renderDashboard();
-    showScreen("dashboard");
-});
-
-// Exit dashboard
-dashboardToggleBack.addEventListener("click", function () {
-    showScreen("welcome");
-});
-
-// Refresh dashboard
-dashboardRefresh.addEventListener("click", function () {
-    renderDashboard();
-});
-
-// Search dashboard participants
-dashboardSearch.addEventListener("input", function () {
-    renderDashboard();
-});
-
-// ── Navigation ────────────────────────────────────────────────────────────────
-function showScreen(screenName) {
-    const screens = [
+function showScreen(name) {
+    [
         welcomeScreen,
         nicknameScreen,
         gameScreen,
         endScreen,
         dashboardScreen
-    ];
+    ].forEach(screen => screen?.classList.remove("active"));
 
-    screens.forEach(function (screen) {
-        if (screen) screen.classList.remove("active");
-    });
+    const screens = {
+        welcome: welcomeScreen,
+        nickname: nicknameScreen,
+        game: gameScreen,
+        end: endScreen,
+        dashboard: dashboardScreen
+    };
 
-    if (screenName === "welcome") {
-        welcomeScreen.classList.add("active");
-    } else if (screenName === "nickname") {
-        nicknameScreen.classList.add("active");
-    } else if (screenName === "game") {
-        gameScreen.classList.add("active");
-    } else if (screenName === "end") {
-        endScreen.classList.add("active");
-    } else if (screenName === "dashboard") {
-        dashboardScreen.classList.add("active");
-    }
+    screens[name]?.classList.add("active");
 }
 
-// ── Game Logic ────────────────────────────────────────────────────────────────
-function startGame() {
-    const name = playerNameInput.value.trim();
+function message(element, text, color = "") {
+    if (!element) return;
+    element.textContent = text;
+    if (color) element.style.color = color;
+}
 
-    if (name === "") {
-        startError.textContent = "Enter a nickname first.";
-        playerNameInput.focus();
+function setBusy(value) {
+    busy = value;
+    if (beginButton) beginButton.disabled = value;
+    if (scanButton) scanButton.disabled = value;
+}
+
+startButton?.addEventListener("click", event => {
+    event.preventDefault();
+    showScreen("nickname");
+    playerNameInput?.focus();
+});
+
+backToLanding?.addEventListener("click", event => {
+    event.preventDefault();
+    message(startError, "");
+    showScreen("welcome");
+});
+
+beginButton?.addEventListener("click", event => {
+    event.preventDefault();
+    startGame();
+});
+
+playerNameInput?.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        startGame();
+    }
+});
+
+findQrButton?.addEventListener("click", event => {
+    event.preventDefault();
+    clueCard?.classList.add("hidden");
+    qrCard?.classList.remove("hidden");
+    message(qrFeedback, "");
+});
+
+scanButton?.addEventListener("click", event => {
+    event.preventDefault();
+    scanCheckpoint();
+});
+
+nextButton?.addEventListener("click", async event => {
+    event.preventDefault();
+    if (busy) return;
+
+    if (score >= TOTAL) {
+        await endGame();
+    } else {
+        await loadQuestion();
+    }
+});
+
+restartButton?.addEventListener("click", () => {
+    token = "";
+    playerName = "";
+    score = 0;
+    currentQuestion = null;
+
+    if (playerNameInput) playerNameInput.value = "";
+    if (progressBar) progressBar.style.width = "0%";
+
+    message(startError, "");
+    showScreen("welcome");
+});
+
+$("dashboardToggleWelcome")?.addEventListener("click", async () => {
+    showScreen("dashboard");
+    await renderDashboard();
+});
+
+$("dashboardToggleEnd")?.addEventListener("click", async () => {
+    showScreen("dashboard");
+    await renderDashboard();
+});
+
+$("dashboardToggleBack")?.addEventListener("click", () => {
+    showScreen("welcome");
+});
+
+$("dashboardRefresh")?.addEventListener("click", renderDashboard);
+$("dashboardSearch")?.addEventListener("input", renderDashboard);
+
+async function startGame() {
+    if (busy) return;
+
+    const name = (playerNameInput?.value || "").trim();
+
+    if (name.length < 2 || name.length > 30) {
+        message(startError, "Enter a nickname between 2 and 30 characters.");
+        playerNameInput?.focus();
         return;
     }
 
-    playerName = name;
-    score = 0;
-    currentQuestionIndex = 0;
-    usedQuestions = [];
+    setBusy(true);
+    message(startError, "");
 
-    displayName.textContent = playerName;
-    scoreDisplay.textContent = score;
-    startError.textContent = "";
+    try {
+        console.log("START GAME: sending nickname");
+        const player = await api("/player", {
+            method: "POST",
+            body: JSON.stringify({ name })
+        });
 
-    showScreen("game");
-    loadQuestion();
+        playerName = player.name;
+        console.log("PLAYER CREATED:", player);
+        token = player.token;
+        score = 0;
+
+        if (displayName) displayName.textContent = playerName;
+        if (scoreDisplay) scoreDisplay.textContent = "0";
+        if (progressBar) progressBar.style.width = "0%";
+
+        showScreen("game");
+        await loadQuestion();
+    } catch (error) {
+        showScreen("nickname");
+        message(startError, error.message, "#f87171");
+    } finally {
+        setBusy(false);
+    }
 }
 
-function loadQuestion() {
+async function loadQuestion() {
+    setBusy(true);
     resetRound();
 
-    if (usedQuestions.length >= questions.length) {
-        endGame();
-        return;
+    try {
+        const data = await api("/challenge");
+
+        if (data.finished) {
+            score = Number(data.score ?? score);
+            updateProgress();
+            await endGame();
+            return;
+        }
+
+        if (data.state === "waiting_scan") {
+            message(feedback, "Correct answer! Find your checkpoint.");
+            message(clueText, data.clue || "Find your assigned checkpoint.");
+            clueCard?.classList.remove("hidden");
+            return;
+        }
+
+        currentQuestion = data;
+
+        if (questionNumber) {
+            questionNumber.textContent = `${Math.min(score + 1, TOTAL)} / ${TOTAL}`;
+        }
+
+        if (questionElement) questionElement.textContent = data.text;
+
+        updateProgress();
+        createAnswerButtons(data.choices || []);
+    } catch (error) {
+        message(feedback, error.message, "#f87171");
+    } finally {
+        setBusy(false);
     }
-
-    // Pick a question that hasn't appeared in this game
-    let randomIndex;
-
-    do {
-        randomIndex = Math.floor(Math.random() * questions.length);
-    } while (usedQuestions.includes(randomIndex));
-
-    usedQuestions.push(randomIndex);
-
-    currentQuestion = questions[randomIndex];
-    currentQuestionIndex++;
-
-    questionNumber.textContent =
-        currentQuestionIndex + " / " + totalQuestions;
-
-    updateProgress();
-    questionElement.textContent = currentQuestion.question;
-    createAnswerButtons(currentQuestion);
 }
 
-function createAnswerButtons(question) {
-    answersContainer.innerHTML = "";
+function createAnswerButtons(choices) {
+    if (!answers) return;
 
-    const shuffledAnswers = [...question.answers];
-    shuffleArray(shuffledAnswers);
+    answers.innerHTML = "";
 
-    shuffledAnswers.forEach(function (answer) {
+    choices.forEach(answer => {
         const button = document.createElement("button");
-
+        button.type = "button";
         button.textContent = answer;
         button.classList.add("answer-button");
 
-        button.addEventListener("click", function () {
-            checkAnswer(answer, button);
+        button.addEventListener("click", () => checkAnswer(answer, button));
+
+        answers.appendChild(button);
+    });
+}
+
+async function checkAnswer(answer, button) {
+    if (busy || !currentQuestion) return;
+
+    setBusy(true);
+
+    document.querySelectorAll(".answer-button").forEach(item => {
+        item.disabled = true;
+    });
+
+    try {
+        const result = await api("/challenge/answer", {
+            method: "POST",
+            body: JSON.stringify({ answer })
         });
 
-        answersContainer.appendChild(button);
-    });
-}
+        if (result.correct) {
+            button.classList.add("correct");
+            message(feedback, "Correct! Follow the clue below.", "#4ade80");
+            message(clueText, result.clue || "Find your assigned checkpoint.");
+            clueCard?.classList.remove("hidden");
+        } else {
+            button.classList.add("wrong");
+            message(feedback, "Incorrect answer. Try the next question.", "#f87171");
+            currentQuestion = null;
 
-function checkAnswer(answer, clickedButton) {
-    const answerButtons = document.querySelectorAll(".answer-button");
+            window.setTimeout(() => {
+                loadQuestion();
+            }, 1000);
+        }
+    } catch (error) {
+        message(feedback, error.message, "#f87171");
 
-    answerButtons.forEach(function (button) {
-        button.disabled = true;
-    });
-
-    if (answer === currentQuestion.correct) {
-        clickedButton.classList.add("correct");
-        feedback.textContent = "Correct. Follow the clue below.";
-        feedback.style.color = "#4ade80";
-        showClue();
-        return;
+        document.querySelectorAll(".answer-button").forEach(item => {
+            item.disabled = false;
+        });
+    } finally {
+        setBusy(false);
     }
-
-    clickedButton.classList.add("wrong");
-    feedback.textContent = "Not quite. Try the next challenge.";
-    feedback.style.color = "#f87171";
-
-    setTimeout(function () {
-        loadQuestion();
-    }, 1200);
 }
 
-function showClue() {
-    clueText.textContent = currentQuestion.clue;
-    clueCard.classList.remove("hidden");
+async function scanCheckpoint() {
+    if (busy) return;
+
+    const code = window.prompt("Enter your checkpoint ID (example: QR-01):");
+    if (code === null) return;
+
+    const secret = window.prompt("Enter the checkpoint secret:");
+    if (secret === null) return;
+
+    setBusy(true);
+    message(qrFeedback, "Checking checkpoint...");
+
+    try {
+        const result = await api("/qr/scan", {
+            method: "POST",
+            body: JSON.stringify({
+                code: code.trim(),
+                secret: secret.trim()
+            })
+        });
+
+        score = Number(result.score ?? score);
+        updateProgress();
+
+        message(
+            qrFeedback,
+            result.finished
+                ? "Checkpoint accepted! Hunt completed!"
+                : "Checkpoint accepted! You earned a point!",
+            "#4ade80"
+        );
+
+        nextButton?.classList.remove("hidden");
+
+        if (nextButton) {
+            nextButton.textContent = result.finished
+                ? "FINISH THE HUNT"
+                : "CONTINUE THE HUNT →";
+        }
+
+        await showLeaderboard();
+    } catch (error) {
+        message(qrFeedback, error.message, "#f87171");
+    } finally {
+        setBusy(false);
+    }
 }
 
 function resetRound() {
-    clueCard.classList.add("hidden");
-    qrCard.classList.add("hidden");
-    nextButton.classList.add("hidden");
+    clueCard?.classList.add("hidden");
+    qrCard?.classList.add("hidden");
+    nextButton?.classList.add("hidden");
 
-    feedback.textContent = "";
-    feedback.style.color = "";
+    message(feedback, "");
+    message(qrFeedback, "");
 
-    qrFeedback.textContent = "";
-    qrFeedback.style.color = "";
-
-    scanButton.disabled = false;
-    answersContainer.innerHTML = "";
+    if (answers) answers.innerHTML = "";
 }
 
 function updateProgress() {
-    const progress = (currentQuestionIndex / totalQuestions) * 100;
-    progressBar.style.width = progress + "%";
+    if (scoreDisplay) scoreDisplay.textContent = String(score);
+
+    if (progressBar) {
+        progressBar.style.width = `${Math.min(score / TOTAL * 100, 100)}%`;
+    }
+
+    if (questionNumber) {
+        questionNumber.textContent = `${Math.min(score + 1, TOTAL)} / ${TOTAL}`;
+    }
 }
 
-function endGame() {
+async function endGame() {
     showScreen("end");
 
-    finalScore.textContent = score;
+    if (finalScore) finalScore.textContent = String(score);
 
-    const endPlayerName = document.getElementById("endPlayerName");
+    const endName = $("endPlayerName");
+    if (endName) endName.textContent = playerName;
 
-    if (endPlayerName) {
-        endPlayerName.textContent = playerName;
+    if (finalMessage) {
+        finalMessage.textContent =
+            `You completed the hunt with ${score} out of ${TOTAL} checkpoints.`;
     }
 
-    finalMessage.textContent =
-        "You completed all " + totalQuestions + " challenges.";
-
-    saveScore();
-    showLeaderboard();
-    renderDashboard();
+    await showLeaderboard();
+    await renderDashboard();
 }
 
-// ── Persistence ───────────────────────────────────────────────────────────────
-function saveScore() {
-    const oldScores = getStoredScores();
+function renderRows(container, players) {
+    if (!container) return;
 
-    oldScores.push({
-        name: playerName,
-        score: score
-    });
+    container.innerHTML = "";
 
-    oldScores.sort(function (a, b) {
-        return b.score - a.score;
-    });
-
-    try {
-        localStorage.setItem("csccScores", JSON.stringify(oldScores));
-    } catch (error) {
-        console.warn("Could not save scores in this browser.", error);
-    }
-}
-
-function getStoredScores() {
-    try {
-        const stored = JSON.parse(localStorage.getItem("csccScores"));
-        return Array.isArray(stored) ? stored : [];
-    } catch (error) {
-        return [];
-    }
-}
-
-// ── Leaderboard ──────────────────────────────────────────────────────────────
-function showLeaderboard() {
-    const scores = getStoredScores();
-
-    leaderboard.innerHTML = "";
-
-    if (!scores.length) {
-        leaderboard.innerHTML =
-            '<div class="empty-state">No scores recorded yet.</div>';
+    if (!players.length) {
+        container.innerHTML = '<div class="empty-state">No scores recorded yet.</div>';
         return;
     }
 
-    scores.slice(0, 10).forEach(function (player, index) {
+    players.slice(0, 10).forEach((player, index) => {
         const row = document.createElement("div");
         row.classList.add("leaderboard-row");
 
@@ -439,159 +419,85 @@ function showLeaderboard() {
 
         const place = document.createElement("span");
         place.classList.add("player-place");
-        place.textContent = "#" + (index + 1);
+        place.textContent = "#" + (player.rank || index + 1);
 
         const name = document.createElement("strong");
         name.textContent = player.name;
 
-        const playerScore = document.createElement("span");
-        playerScore.classList.add("player-score");
-        playerScore.textContent = player.score + " pts";
+        const points = document.createElement("span");
+        points.classList.add("player-score");
+        points.textContent = `${player.score} pts`;
 
-        nameContainer.appendChild(place);
-        nameContainer.appendChild(name);
-        row.appendChild(nameContainer);
-        row.appendChild(playerScore);
-        leaderboard.appendChild(row);
+        nameContainer.append(place, name);
+        row.append(nameContainer, points);
+        container.appendChild(row);
     });
 }
 
-// ── Organizer Dashboard ───────────────────────────────────────────────────────
-function getDashboardParticipants() {
-    const savedScores = getStoredScores();
-
-    const savedRows = savedScores.map(function (entry) {
-        return {
-            name: entry.name,
-            score: entry.score,
-            status: entry.score >= 5 ? "Completed" : "Playing",
-            challenge: entry.score >= 5 ? "Complete" : "In progress",
-            checkpoint: entry.score >= 5
-                ? "Finished"
-                : "QR-0" + Math.min(entry.score + 1, 5)
-        };
-    });
-
-    const combined = [...demoParticipants, ...savedRows];
-    const seen = new Set();
-
-    return combined
-        .filter(function (item) {
-            const key = (item.name || "").toLowerCase();
-
-            if (!key || seen.has(key)) return false;
-
-            seen.add(key);
-            return true;
-        })
-        .sort(function (a, b) {
-            return b.score - a.score;
-        });
-}
-
-function renderDashboard() {
-    const participants = getDashboardParticipants();
-    const searchText = (dashboardSearch.value || "").trim().toLowerCase();
-
-    const filtered = participants.filter(function (person) {
-        return person.name.toLowerCase().includes(searchText);
-    });
-
-    dashboardLeaderboard.innerHTML = "";
-
-    if (filtered.length === 0) {
-        dashboardEmpty.classList.remove("hidden");
-    } else {
-        dashboardEmpty.classList.add("hidden");
-
-        filtered.slice(0, 8).forEach(function (player, index) {
-            const row = document.createElement("div");
-            row.classList.add("leaderboard-row");
-
-            const nameContainer = document.createElement("div");
-            nameContainer.classList.add("player-name");
-
-            const place = document.createElement("span");
-            place.classList.add("player-place");
-            place.textContent = "#" + (index + 1);
-
-            const name = document.createElement("strong");
-            name.textContent = player.name;
-
-            const playerScore = document.createElement("span");
-            playerScore.classList.add("player-score");
-            playerScore.textContent = player.score + " pts";
-
-            nameContainer.appendChild(place);
-            nameContainer.appendChild(name);
-            row.appendChild(nameContainer);
-            row.appendChild(playerScore);
-
-            dashboardLeaderboard.appendChild(row);
-        });
-    }
-
-    const completedCount = participants.filter(function (person) {
-        return person.status === "Completed" || person.score >= 5;
-    }).length;
-
-    const playingCount = participants.filter(function (person) {
-        return person.status === "Playing";
-    }).length;
-
-    statTotal.textContent = participants.length;
-    statPlaying.textContent = playingCount;
-    statCompleted.textContent = completedCount;
-
-    const activityItems = filtered.length
-        ? filtered.slice(0, 5)
-        : [];
-
-    dashboardActivity.innerHTML = "";
-
-    if (activityItems.length === 0) {
-        dashboardActivityEmpty.classList.remove("hidden");
-        return;
-    }
-
-    dashboardActivityEmpty.classList.add("hidden");
-
-    activityItems.forEach(function (player) {
-        const item = document.createElement("div");
-        item.classList.add("activity-row");
-
-        const details = document.createElement("div");
-
-        const name = document.createElement("strong");
-        name.textContent = player.name;
-
-        const meta = document.createElement("div");
-        meta.classList.add("activity-meta");
-        meta.textContent =
-            "Status: " + player.status + " • " + player.challenge;
-
-        const playerScore = document.createElement("div");
-        playerScore.classList.add("player-score");
-        playerScore.textContent = player.score + " pts";
-
-        details.appendChild(name);
-        details.appendChild(meta);
-        item.appendChild(details);
-        item.appendChild(playerScore);
-
-        dashboardActivity.appendChild(item);
-    });
-}
-
-// ── Utilities ─────────────────────────────────────────────────────────────────
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const randomIndex = Math.floor(Math.random() * (i + 1));
-        [array[i], array[randomIndex]] = [array[randomIndex], array[i]];
+async function showLeaderboard() {
+    try {
+        const players = await api("/leaderboard");
+        renderRows(leaderboard, players);
+    } catch (error) {
+        if (leaderboard) leaderboard.textContent = error.message;
     }
 }
 
-// ── Initialise ────────────────────────────────────────────────────────────────
+async function renderDashboard() {
+    const container = $("dashboardLeaderboard");
+    if (!container) return;
+
+    try {
+        const players = await api("/leaderboard");
+        const query = ($("dashboardSearch")?.value || "").trim().toLowerCase();
+
+        const filtered = players.filter(player =>
+            player.name.toLowerCase().includes(query)
+        );
+
+        renderRows(container, filtered);
+
+        $("dashboardEmpty")?.classList.toggle("hidden", filtered.length > 0);
+
+        const completed = players.filter(player => player.finished).length;
+
+        if ($("statTotal")) $("statTotal").textContent = String(players.length);
+        if ($("statCompleted")) $("statCompleted").textContent = String(completed);
+        if ($("statPlaying")) $("statPlaying").textContent = String(players.length - completed);
+
+        const activity = $("dashboardActivity");
+
+        if (activity) {
+            activity.innerHTML = "";
+
+            filtered.slice(0, 5).forEach(player => {
+                const item = document.createElement("div");
+                item.classList.add("activity-row");
+
+                const details = document.createElement("div");
+                const name = document.createElement("strong");
+                name.textContent = player.name;
+
+                const status = document.createElement("div");
+                status.classList.add("activity-meta");
+                status.textContent = player.finished ? "Status: Completed" : "Status: Playing";
+
+                details.append(name, status);
+
+                const points = document.createElement("div");
+                points.classList.add("player-score");
+                points.textContent = `${player.score} pts`;
+
+                item.append(details, points);
+                activity.appendChild(item);
+            });
+        }
+
+        $("dashboardActivityEmpty")?.classList.toggle("hidden", filtered.length > 0);
+    } catch (error) {
+        container.textContent = error.message;
+    }
+}
+
 showScreen("welcome");
 showLeaderboard();
-renderDashboard();
