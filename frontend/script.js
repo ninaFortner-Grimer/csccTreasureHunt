@@ -370,7 +370,11 @@ function startQrScanner() {
 
 function stopQrScanner() {
     if (qrScanner) {
-        qrScanner.stop().catch(() => {});
+        try {
+            qrScanner.stop().catch(() => {});
+        } catch {
+            // Scanner was not running (camera blocked or still starting)
+        }
         qrScanner = null;
     }
     const container = $("qrReaderContainer");
