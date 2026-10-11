@@ -24,9 +24,10 @@ app.use(cors({
 app.use(express.json({ limit: '16kb' }));
 
 // Rate limiting — general API rate limit
+// Limits are per IP; on campus Wi-Fi all players can share one public IP
 const limiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 120,
+  max: 2000,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests, please wait a moment.' },
@@ -36,7 +37,7 @@ app.use('/api/', limiter);
 // Player creation rate limit
 const createLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 10,
+  max: 100,
   message: { error: 'Too many registration attempts, please wait.' },
 });
 app.use('/api/player', createLimiter);

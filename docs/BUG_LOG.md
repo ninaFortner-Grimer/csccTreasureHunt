@@ -156,4 +156,5 @@ so the game ignores this error and continues.
 | 8 | QR secrets are written in the README and `qrcodes.json`. If the repo is public, players can score without finding the QR codes. | `README.md`, `backend/data/qrcodes.json` | Cheating |
 | 9 | If `FRONTEND_ORIGIN` is not set, any website can call the backend. | `backend/app.js` line 13 | Security |
 | 10 | ~~README says the game survives a page refresh, but the code does not save the token.~~ Fixed with bug 1. | `frontend/script.js` | — |
+| 12 | ~~Rate limits too low for campus Wi-Fi, where all players can share one public IP (10 registrations and 120 requests per minute for everyone).~~ Fixed: raised to 100 registrations and 2000 requests per minute per IP. | `backend/app.js` | — |
 | 11 | ~~Checkpoint ID and secret are case-sensitive. A player typing `qr-01` gets "Wrong checkpoint! You need to scan QR-01."~~ Fixed: manual entry is converted to uppercase before sending. | `frontend/script.js` (`scanCheckpointManual`) | — |
