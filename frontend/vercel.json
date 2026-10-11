@@ -1,3 +1,4 @@
 {
-  "buildCommand": "echo \"window.CSCC_API_BASE = '$CSCC_API_BASE';\" > config.js"
+  "buildCommand": "echo \"window.CSCC_API_BASE = '$CSCC_API_BASE';\" > config.js",
+  "outputDirectory": "."
 }
