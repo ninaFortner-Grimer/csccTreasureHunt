@@ -224,7 +224,10 @@ Settings live in `backend/.env` (never committed to git).
 5. Click **Deploy Web Service**, wait for status **Live**.
 6. Check: open `https://<service>.onrender.com/api/health`, expected `{"status":"ok", ...}`.
 
-With **Auto-Deploy: On Commit**, Render redeploys every time the branch is pushed.
+Redeploying after a push: when the service was created with **Public Git Repository**,
+Render has no access to GitHub notifications, so it does **not** redeploy by itself even if
+Auto-Deploy shows "On Commit". After each push, click **Manual Deploy > Deploy latest commit**.
+(Auto-deploy works only if the repository owner connects Render to GitHub.)
 
 Free plan limits: the service sleeps after 15 minutes without requests
 (first request then takes up to 1 minute), and files written by the server
