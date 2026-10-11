@@ -99,7 +99,18 @@ checks that the latest deploy in **Events** uses a recent commit, then calls exa
 **Why it happens:** `frontend/script.js` line 10 always calls `http://localhost:3000`.
 A deployed website cannot reach a server on the player's own computer.
 
-**Fix:** To be done during deployment (make the backend address configurable).
+**Fix (part 1, backend address configurable):**
+- New file `frontend/config.js` sets `window.CSCC_API_BASE` (local default: `http://localhost:3000`).
+- `frontend/index.html` loads `config.js` before `script.js`.
+- `frontend/script.js` already reads `window.CSCC_API_BASE` (line 10), so the game logic does not change.
+- On Vercel, the build command rewrites `config.js` from the `CSCC_API_BASE` environment variable,
+  so no URL is hardcoded for production.
+
+**How to test (local):** start backend and frontend, open http://localhost:5500, press F12,
+tab **Network**, register a player. Expected: requests go to `http://localhost:3000/api/...`
+and the game works as before.
+
+**Fix (part 2):** deploy the frontend on Vercel (to do).
 
 ---
 

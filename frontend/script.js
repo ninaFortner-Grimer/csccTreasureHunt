@@ -5,8 +5,8 @@
    ============================================================= */
 
 // ── Configuration ─────────────────────────────────────────────
-// In production, replace with your deployed backend URL.
-// During local development: http://localhost:3000/api
+// Backend address comes from config.js (window.CSCC_API_BASE).
+// Falls back to the local backend if config.js is missing.
 const API = (window.CSCC_API_BASE || "http://localhost:3000") + "/api";
 const TOTAL = 5; // total QR checkpoints
 
