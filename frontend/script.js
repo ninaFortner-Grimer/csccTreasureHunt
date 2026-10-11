@@ -428,7 +428,8 @@ function scanCheckpointManual() {
     const secret = window.prompt("Enter the checkpoint secret:");
     if (secret === null) return;
 
-    submitQrScan(code.trim(), secret.trim());
+    // Checkpoint IDs and secrets are uppercase; accept lowercase typing on phones
+    submitQrScan(code.trim().toUpperCase(), secret.trim().toUpperCase());
 }
 
 async function submitQrScan(code, secret) {
