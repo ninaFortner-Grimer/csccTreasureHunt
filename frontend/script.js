@@ -70,7 +70,9 @@ async function api(path, options = {}) {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        throw new Error(data.error || `Request failed (${response.status})`);
+        const error = new Error(data.error || `Request failed (${response.status})`);
+        error.status = response.status;
+        throw error;
     }
 
     return data;
@@ -97,6 +99,22 @@ function message(element, text, color = "") {
     if (!element) return;
     element.textContent = text;
     element.style.color = color || "";
+}
+
+// ── Session Storage ────────────────────────────────────────────
+// Keeps the player token across page reloads (refresh, closed tab).
+const TOKEN_KEY = "csccPlayerToken";
+
+function saveToken(value) {
+    try { localStorage.setItem(TOKEN_KEY, value); } catch {}
+}
+
+function loadToken() {
+    try { return localStorage.getItem(TOKEN_KEY) || ""; } catch { return ""; }
+}
+
+function clearToken() {
+    try { localStorage.removeItem(TOKEN_KEY); } catch {}
 }
 
 function setBusy(value) {
@@ -156,6 +174,7 @@ nextButton?.addEventListener("click", async event => {
 
 restartButton?.addEventListener("click", () => {
     stopQrScanner();
+    clearToken();
     token = "";
     playerName = "";
     score = 0;
@@ -215,6 +234,7 @@ async function startGame() {
 
         playerName = player.name;
         token = player.token;
+        saveToken(token);
         score = 0;
 
         if (displayName) displayName.textContent = playerName;
@@ -606,8 +626,35 @@ async function renderDashboard() {
     }
 }
 
+// ── Resume Saved Session ───────────────────────────────────────
+async function resumeSession() {
+    token = loadToken();
+    if (!token) return;
+
+    try {
+        const player = await api("/player/me");
+
+        playerName = player.name;
+        score = Number(player.score || 0);
+
+        if (displayName) displayName.textContent = playerName;
+        updateProgress();
+
+        showScreen("game");
+        await loadQuestion();
+    } catch (error) {
+        console.warn("[CSCC] Could not resume session:", error.message);
+        // Forget the token only if the server rejected it (e.g. player deleted)
+        if (error.status === 401) clearToken();
+        token = "";
+        showScreen("welcome");
+    }
+}
+
 // ── Init ───────────────────────────────────────────────────────
 showScreen("welcome");
 
 // Silently pre-warm leaderboard (backend may be offline during dev)
 showLeaderboard().catch(() => {});
+
+resumeSession();

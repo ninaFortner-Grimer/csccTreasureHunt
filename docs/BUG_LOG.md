@@ -7,7 +7,7 @@ Status values: **Open** (found, not fixed), **Fixed** (fixed and tested).
 
 ## Bug 1 — "Begin the hunt" sends the player back, score stays at 0
 
-**Status:** Open (cause confirmed: the game works when served with `npx serve` instead of Live Server)
+**Status:** Fixed (tested locally: reload keeps the player at every step). Cause confirmed: the game works when served with `npx serve` instead of Live Server.
 
 **What users see:** The player enters a nickname and clicks BEGIN THE HUNT.
 The nickname appears in the organizer dashboard, but the page goes back to the start
@@ -29,10 +29,26 @@ Before the backend existed, nothing wrote files during the game, so this never h
 The same problem happens if the backend is started with `npm run dev` (nodemon):
 nodemon restarts the server every time `players.json` changes.
 
-**Fix:** To be decided.
+**Fix (in `frontend/script.js`):**
+- After registration, the token is saved in the browser (`localStorage`, key `csccPlayerToken`).
+- When the page loads, `resumeSession()` reads the saved token, asks the backend
+  `GET /api/player/me`, and puts the player back on the game screen at the right step
+  (question, clue, or end screen).
+- If the backend says the token is invalid (401), the saved token is deleted and the
+  welcome screen is shown.
+- PLAY AGAIN deletes the saved token, so a new player can register.
 
-**How to test:** See `PROJECT_GUIDE.md`, section 4. Start the frontend with
-`npx serve frontend -l 5500` instead of Live Server, then play one round.
+Live Server reloads no longer lose the player. A phone refresh or a closed tab no longer loses progress.
+Using `npx serve` (see `PROJECT_GUIDE.md`) is still recommended.
+
+**How to test:**
+1. Start backend and frontend (see `PROJECT_GUIDE.md`, section 4).
+2. Open http://localhost:5500, register a new nickname, answer one question correctly.
+3. Press F5 to reload the page. Expected: the same player is back, with the clue card shown.
+4. Scan QR-01 manually (`QR-01` / `CSCC-LAB-7K2P`), click CONTINUE, then reload again.
+   Expected: score 1, question 2 shown.
+5. Finish the game, reload. Expected: end screen with the final score.
+6. Click PLAY AGAIN, reload. Expected: welcome screen (no player resumed).
 
 ---
 
@@ -104,4 +120,4 @@ so the game ignores this error and continues.
 | 7 | `players.json` with real player names and tokens is committed to git. | `backend/data/players.json` | Privacy |
 | 8 | QR secrets are written in the README and `qrcodes.json`. If the repo is public, players can score without finding the QR codes. | `README.md`, `backend/data/qrcodes.json` | Cheating |
 | 9 | If `FRONTEND_ORIGIN` is not set, any website can call the backend. | `backend/app.js` line 13 | Security |
-| 10 | README says the game survives a page refresh, but the code does not save the token. | `README.md`, `frontend/script.js` | Players lose progress on refresh |
+| 10 | ~~README says the game survives a page refresh, but the code does not save the token.~~ Fixed with bug 1. | `frontend/script.js` | — |
