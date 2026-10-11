@@ -37,7 +37,7 @@ and the backend sends back a response (for example "correct, here is your clue")
  (frontend/index.html + script.js)        (backend/app.js)
         |                                         |
         |  POST /api/player  {name}               |
-        | --------------------------------------> |  creates player, saves to players.json
+        | --------------------------------------> |  creates player, saves it in the database
         | <-------------------------------------- |  returns a token (the player's ID card)
         |                                         |
         |  GET /api/challenge  + token            |
@@ -84,7 +84,7 @@ csccTreasureHunt/
 │   ├── data/                 The "database" (plain JSON files)
 │   │   ├── questions.json    Question bank
 │   │   ├── qrcodes.json      The 5 checkpoints, their secrets and clues
-│   │   └── players.json      All registered players and their progress
+│   │   └── players.json      Players (only used when no database is configured)
 │   ├── .env.example          Template for settings (copy it to .env)
 │   └── package.json          Backend dependencies and start commands
 ├── QR/                       Generated QR images + printable sheet
@@ -93,7 +93,9 @@ csccTreasureHunt/
 └── docs/                     Project documentation (this file + bug log)
 ```
 
-There is no real database. All data lives in the JSON files in `backend/data/`.
+Questions and QR checkpoints live in the JSON files in `backend/data/`.
+Players are stored in a PostgreSQL database on Neon (table `players`) when `DATABASE_URL` is set.
+Without `DATABASE_URL`, players are stored in `backend/data/players.json` (fine for local testing only).
 
 ---
 
@@ -199,6 +201,7 @@ Settings live in `backend/.env` (never committed to git).
 | `PORT` | `3000` | Port the backend listens on. |
 | `FRONTEND_ORIGIN` | `http://localhost:5500` | Website address allowed to call the backend (CORS). |
 | `ORGANIZER_PASSWORD` | (secret) | Password for the organizer login. |
+| `DATABASE_URL` | (secret) `postgresql://...` | Neon connection string. If empty, players are saved in `players.json`. |
 
 ---
 
@@ -220,7 +223,7 @@ Settings live in `backend/.env` (never committed to git).
 | Start Command | `npm start` |
 | Instance Type | Free |
 
-4. Environment variables: `ORGANIZER_PASSWORD`. Do not set `PORT`.
+4. Environment variables: `ORGANIZER_PASSWORD` and `DATABASE_URL` (Neon connection string). Do not set `PORT`.
 5. Click **Deploy Web Service**, wait for status **Live**.
 6. Check: open `https://<service>.onrender.com/api/health`, expected `{"status":"ok", ...}`.
 
@@ -230,8 +233,17 @@ Auto-Deploy shows "On Commit". After each push, click **Manual Deploy > Deploy l
 (Auto-deploy works only if the repository owner connects Render to GitHub.)
 
 Free plan limits: the service sleeps after 15 minutes without requests
-(first request then takes up to 1 minute), and files written by the server
-(like `players.json`) are erased on every restart or deploy.
+(first request then takes up to 1 minute), and files written by the server are erased
+on every restart or deploy. This is why players are stored in Neon, not in `players.json`.
+
+### Database on Neon (free plan)
+
+1. On https://console.neon.tech, create a project in the region closest to the Render service.
+2. Click **Connect** and copy the connection string.
+3. Put it in `DATABASE_URL`: in `backend/.env` locally, and in the Render **Environment** tab.
+   Never commit it.
+4. The backend creates the `players` table by itself on startup.
+   The startup log shows `Loaded N players from the database`.
 
 ### Frontend
 

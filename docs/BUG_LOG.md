@@ -147,7 +147,7 @@ so the game ignores this error and continues.
 | # | Issue | Where | Risk |
 |---|---|---|---|
 | 1 | ~~Rate limit counts all players as one user on Render (missing `trust proxy`).~~ Fixed: `app.set('trust proxy', 1)` in `backend/app.js`, so each player is limited by their own IP. | `backend/app.js` | — |
-| 2 | Render free plan erases files on restart and sleeps after 15 minutes. Players and scores in `players.json` are lost. | `backend/db/store.js` | High on event day |
+| 2 | ~~Render free plan erases files on restart and sleeps after 15 minutes. Players and scores in `players.json` are lost.~~ Fixed: players are stored in Neon PostgreSQL when `DATABASE_URL` is set (`backend/db/store.js`). | `backend/db/store.js` | — |
 | 3 | The correct answer is sent to the browser. Players can see it in DevTools. | `backend/routes/challenge.js` line 47 | Cheating |
 | 4 | A wrong answer shows the same question again, not a new one. | `backend/routes/challenge.js` line 96 | Does not match game rules |
 | 5 | Dashboard "Completed" count is always 0 (`finished` vs `isFinished`). | `frontend/script.js` lines 523, 559, 585 | Wrong stats |

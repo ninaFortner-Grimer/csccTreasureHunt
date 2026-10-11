@@ -60,7 +60,7 @@ router.post('/scan', auth, (req, res) => {
     player.state = 'waiting_answer';
   }
 
-  store.save();
+  store.save(player);
 
   return res.json({
     success: true,

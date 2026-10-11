@@ -10,7 +10,7 @@ router.get('/', auth, (req, res) => {
   if (player.state === 'finished' || player.currentRoundIndex >= 5) {
     player.state = 'finished';
     if (!player.finishedAt) player.finishedAt = Date.now();
-    store.save();
+    store.save(player);
     return res.json({ finished: true, score: player.score, total: 5 });
   }
 
@@ -80,7 +80,7 @@ router.post('/answer', auth, (req, res) => {
 
   if (isCorrect) {
     player.state = 'waiting_scan';
-    store.save();
+    store.save(player);
 
     const currentCpId = player.assignedCheckpointIds[player.currentRoundIndex];
     const cp = store.getQrById(currentCpId);

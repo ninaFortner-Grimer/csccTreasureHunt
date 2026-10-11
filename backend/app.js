@@ -41,9 +41,6 @@ const createLimiter = rateLimit({
 });
 app.use('/api/player', createLimiter);
 
-// Load data store (questions, QR codes, players)
-store.load();
-
 // Game API routes
 const playerRouter = require('./routes/player');
 const challengeRouter = require('./routes/challenge');
@@ -76,6 +73,14 @@ app.use((err, req, res, _next) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`CSCC Treasure Hunt backend running on port ${PORT}`);
-});
+// Load data store (questions, QR codes, players) before accepting requests
+store.load()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`CSCC Treasure Hunt backend running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to load data store:', err.message);
+    process.exit(1);
+  });

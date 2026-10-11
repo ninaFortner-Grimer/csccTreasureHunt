@@ -1,14 +1,24 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { Pool } = require('pg');
 
 const dataDir = path.join(__dirname, '..', 'data');
+
+// Players are stored in PostgreSQL (Neon) when DATABASE_URL is set,
+// otherwise in data/players.json (local development without a database).
+const pool = process.env.DATABASE_URL
+  ? new Pool({ connectionString: process.env.DATABASE_URL })
+  : null;
+
+// Writes run one after another so a player's updates are saved in order
+let writeQueue = Promise.resolve();
 
 let questions = [];
 let qrCodes = [];
 let players = [];
 
-function load() {
+async function load() {
   try {
     questions = JSON.parse(fs.readFileSync(path.join(dataDir, 'questions.json'), 'utf8'));
   } catch (e) {
@@ -21,6 +31,20 @@ function load() {
     console.error('Error loading qrcodes.json:', e.message);
     qrCodes = [];
   }
+
+  if (pool) {
+    // Fail fast: without the database, players would be lost
+    await pool.query(
+      'CREATE TABLE IF NOT EXISTS players (id TEXT PRIMARY KEY, data JSONB NOT NULL)'
+    );
+    const result = await pool.query(
+      "SELECT data FROM players ORDER BY (data->>'startedAt')::bigint"
+    );
+    players = result.rows.map((row) => row.data);
+    console.log(`Loaded ${players.length} players from the database`);
+    return;
+  }
+
   try {
     if (fs.existsSync(path.join(dataDir, 'players.json'))) {
       players = JSON.parse(fs.readFileSync(path.join(dataDir, 'players.json'), 'utf8'));
@@ -33,7 +57,22 @@ function load() {
   }
 }
 
-function save() {
+// save(player) stores one player; save() with no argument stores all players
+function save(player) {
+  if (pool) {
+    const toSave = player ? [player] : players;
+    toSave.forEach((p) => {
+      writeQueue = writeQueue
+        .then(() => pool.query(
+          'INSERT INTO players (id, data) VALUES ($1, $2) ' +
+          'ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data',
+          [p.id, p]
+        ))
+        .catch((e) => console.error('Error saving player to database:', e.message));
+    });
+    return;
+  }
+
   try {
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });
@@ -88,7 +127,7 @@ function createPlayer(name) {
   };
 
   players.push(player);
-  save();
+  save(player);
   return player;
 }
 
