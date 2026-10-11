@@ -18,6 +18,9 @@ Thumbs.db
 dist/
 build/
 
+# Vercel local project link
+.vercel/
+
 # Logs
 *.log
 
