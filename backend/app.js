@@ -5,6 +5,9 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
+
+// Render (and most hosts) sit behind one proxy: use the real client IP for rate limiting
+app.set('trust proxy', 1);
 const store = require('./db/store');
 
 // CORS — allow deployed frontend and local dev

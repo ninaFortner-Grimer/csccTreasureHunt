@@ -146,7 +146,7 @@ so the game ignores this error and continues.
 
 | # | Issue | Where | Risk |
 |---|---|---|---|
-| 1 | Rate limit counts all players as one user on Render (missing `trust proxy`). The whole event shares 10 registrations per minute. | `backend/app.js` lines 24–39 | High on event day |
+| 1 | ~~Rate limit counts all players as one user on Render (missing `trust proxy`).~~ Fixed: `app.set('trust proxy', 1)` in `backend/app.js`, so each player is limited by their own IP. | `backend/app.js` | — |
 | 2 | Render free plan erases files on restart and sleeps after 15 minutes. Players and scores in `players.json` are lost. | `backend/db/store.js` | High on event day |
 | 3 | The correct answer is sent to the browser. Players can see it in DevTools. | `backend/routes/challenge.js` line 47 | Cheating |
 | 4 | A wrong answer shows the same question again, not a new one. | `backend/routes/challenge.js` line 96 | Does not match game rules |
@@ -156,3 +156,4 @@ so the game ignores this error and continues.
 | 8 | QR secrets are written in the README and `qrcodes.json`. If the repo is public, players can score without finding the QR codes. | `README.md`, `backend/data/qrcodes.json` | Cheating |
 | 9 | If `FRONTEND_ORIGIN` is not set, any website can call the backend. | `backend/app.js` line 13 | Security |
 | 10 | ~~README says the game survives a page refresh, but the code does not save the token.~~ Fixed with bug 1. | `frontend/script.js` | — |
+| 11 | Checkpoint ID and secret are case-sensitive. A player typing `qr-01` gets "Wrong checkpoint! You need to scan QR-01." | `frontend/script.js` (`scanCheckpointManual`) | Players stuck on phones |
