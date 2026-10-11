@@ -42,6 +42,14 @@ const createLimiter = rateLimit({
 });
 app.use('/api/player', createLimiter);
 
+// Organizer login rate limit (slows down password guessing)
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: { error: 'Too many login attempts, please wait.' },
+});
+app.use('/api/organizer/login', loginLimiter);
+
 // Game API routes
 const playerRouter = require('./routes/player');
 const challengeRouter = require('./routes/challenge');

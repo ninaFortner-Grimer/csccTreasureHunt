@@ -4,22 +4,70 @@
  * Generates real QR code images for all checkpoints defined in qrcodes.json.
  *
  * QR payload format: CSCC:<id>:<secret>
- * Example: CSCC:QR-01:CSCC-LAB-7K2P
+ * Secrets are read from QR_SECRETS (environment or backend/.env).
+ * If none exist yet, new ones are generated and saved in backend/.env.
  *
  * Output: QR/<id>.png + QR/inventory.json + QR/print_sheet.html
+ * The QR/ folder contains the secrets: it is not committed to git.
  *
  * Usage: node generate_qr.js
  */
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const QRCode = require('qrcode');
 
 const QR_DATA_FILE = path.join(__dirname, 'backend', 'data', 'qrcodes.json');
+const ENV_FILE     = path.join(__dirname, 'backend', '.env');
 const OUTPUT_DIR   = path.join(__dirname, 'QR');
+
+// Secrets are private: they live in QR_SECRETS (backend/.env locally, Render settings online).
+// Format: QR-01=SECRET1,QR-02=SECRET2,...
+function readQrSecretsValue() {
+    if (process.env.QR_SECRETS) return process.env.QR_SECRETS;
+    if (!fs.existsSync(ENV_FILE)) return '';
+    const line = fs.readFileSync(ENV_FILE, 'utf8')
+        .split(/\r?\n/)
+        .find(l => l.trim().startsWith('QR_SECRETS='));
+    return line ? line.split('=').slice(1).join('=').trim().replace(/^"|"$/g, '') : '';
+}
+
+function parseQrSecrets(value) {
+    const secrets = {};
+    value.split(',').forEach(pair => {
+        const [id, secret] = pair.split('=').map(part => (part || '').trim());
+        if (id && secret) secrets[id] = secret;
+    });
+    return secrets;
+}
+
+function randomSecret() {
+    // Uppercase letters and digits without look-alikes (0/O, 1/I)
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let out = '';
+    for (let i = 0; i < 8; i++) out += alphabet[crypto.randomInt(alphabet.length)];
+    return `CSCC-${out}`;
+}
 
 async function main() {
     const qrCodes = JSON.parse(fs.readFileSync(QR_DATA_FILE, 'utf8'));
+
+    let secrets = parseQrSecrets(readQrSecretsValue());
+    if (Object.keys(secrets).length === 0) {
+        // First run: create new secrets and store them in backend/.env (not committed)
+        secrets = {};
+        qrCodes.forEach(qr => { secrets[qr.id] = randomSecret(); });
+        const value = qrCodes.map(qr => `${qr.id}=${secrets[qr.id]}`).join(',');
+        fs.appendFileSync(ENV_FILE, `\nQR_SECRETS=${value}\n`);
+        console.log('New QR secrets created and saved in backend/.env (QR_SECRETS).\n');
+    }
+
+    const missing = qrCodes.filter(qr => !secrets[qr.id]).map(qr => qr.id);
+    if (missing.length > 0) {
+        throw new Error(`Missing secrets in QR_SECRETS for: ${missing.join(', ')}`);
+    }
+    qrCodes.forEach(qr => { qr.secret = secrets[qr.id]; });
 
     if (!fs.existsSync(OUTPUT_DIR)) {
         fs.mkdirSync(OUTPUT_DIR, { recursive: true });

@@ -21,6 +21,12 @@ build/
 # Vercel local project link
 .vercel/
 
+# Local player data (players are stored in the database online)
+backend/data/players.json
+
+# Generated QR codes contain the checkpoint secrets
+QR/
+
 # Logs
 *.log
 

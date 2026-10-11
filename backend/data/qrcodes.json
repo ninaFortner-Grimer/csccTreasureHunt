@@ -1,27 +1,22 @@
 [
   {
     "id": "QR-01",
-    "secret": "CSCC-LAB-7K2P",
     "clue": "Find me where students wait before entering the laboratory."
   },
   {
     "id": "QR-02",
-    "secret": "CSCC-ENT-9M4X",
     "clue": "I'm hiding near the department entrance. Can you find me?"
   },
   {
     "id": "QR-03",
-    "secret": "CSCC-NOT-3W8Y",
     "clue": "Look where schedules and announcements are posted."
   },
   {
     "id": "QR-04",
-    "secret": "CSCC-TD-5R1Z",
     "clue": "You'll find me where students gather to learn and gain knowledge."
   },
   {
     "id": "QR-05",
-    "secret": "CSCC-SOC-2L6V",
     "clue": "You'll find me where students learn new things, explore their interests, and have fun doing what they love."
   }
 ]

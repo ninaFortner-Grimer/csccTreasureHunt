@@ -32,6 +32,15 @@ async function load() {
     qrCodes = [];
   }
 
+  // QR secrets come from the QR_SECRETS environment variable, never from the repo
+  // Format: QR-01=SECRET1,QR-02=SECRET2,...
+  const secrets = parseQrSecrets(process.env.QR_SECRETS);
+  qrCodes = qrCodes.map((qr) => ({ ...qr, secret: secrets[qr.id] || '' }));
+  const missing = qrCodes.filter((qr) => !qr.secret).map((qr) => qr.id);
+  if (missing.length > 0) {
+    console.error(`Missing QR secrets for: ${missing.join(', ')}. Set QR_SECRETS.`);
+  }
+
   if (pool) {
     // Fail fast: without the database, players would be lost
     await pool.query(
@@ -55,6 +64,15 @@ async function load() {
     console.error('Error loading players.json:', e.message);
     players = [];
   }
+}
+
+function parseQrSecrets(value) {
+  const secrets = {};
+  (value || '').split(',').forEach((pair) => {
+    const [id, secret] = pair.split('=').map((part) => (part || '').trim());
+    if (id && secret) secrets[id] = secret;
+  });
+  return secrets;
 }
 
 // save(player) stores one player; save() with no argument stores all players

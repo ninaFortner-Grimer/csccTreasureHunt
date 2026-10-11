@@ -45,7 +45,7 @@ Using `npx serve` (see `PROJECT_GUIDE.md`) is still recommended.
 1. Start backend and frontend (see `PROJECT_GUIDE.md`, section 4).
 2. Open http://localhost:5500, register a new nickname, answer one question correctly.
 3. Press F5 to reload the page. Expected: the same player is back, with the clue card shown.
-4. Scan QR-01 manually (`QR-01` / `CSCC-LAB-7K2P`), click CONTINUE, then reload again.
+4. Scan QR-01 manually (`QR-01` / the QR-01 secret from `QR_SECRETS` in `backend/.env`), click CONTINUE, then reload again.
    Expected: score 1, question 2 shown.
 5. Finish the game, reload. Expected: end screen with the final score.
 6. Click PLAY AGAIN, reload. Expected: welcome screen (no player resumed).
@@ -137,7 +137,7 @@ so the game ignores this error and continues.
 2. Open http://localhost:5500, register a new nickname, answer correctly.
 3. Click I FOUND THE QR CODE. When the browser asks for the camera, click **Block**.
 4. Expected: the message "Camera not available..." appears.
-5. Click ENTER CODE MANUALLY, type `QR-01`, then `CSCC-LAB-7K2P`.
+5. Click ENTER CODE MANUALLY, type `QR-01`, then the QR-01 secret from `QR_SECRETS` in `backend/.env`.
 6. Click CONTINUE THE HUNT. Expected: question 2 appears.
 
 ---
@@ -148,12 +148,12 @@ so the game ignores this error and continues.
 |---|---|---|---|
 | 1 | ~~Rate limit counts all players as one user on Render (missing `trust proxy`).~~ Fixed: `app.set('trust proxy', 1)` in `backend/app.js`, so each player is limited by their own IP. | `backend/app.js` | — |
 | 2 | ~~Render free plan erases files on restart and sleeps after 15 minutes. Players and scores in `players.json` are lost.~~ Fixed: players are stored in Neon PostgreSQL when `DATABASE_URL` is set (`backend/db/store.js`). | `backend/db/store.js` | — |
-| 3 | The correct answer is sent to the browser. Players can see it in DevTools. | `backend/routes/challenge.js` line 47 | Cheating |
-| 4 | A wrong answer shows the same question again, not a new one. | `backend/routes/challenge.js` line 96 | Does not match game rules |
-| 5 | Dashboard "Completed" count is always 0 (`finished` vs `isFinished`). | `frontend/script.js` lines 523, 559, 585 | Wrong stats |
-| 6 | Organizer dashboard has no password in the frontend. Default passwords are written in the code, README and `.env.example`. | `backend/routes/organizer.js` line 7 | Security |
-| 7 | `players.json` with real player names and tokens is committed to git. | `backend/data/players.json` | Privacy |
-| 8 | QR secrets are written in the README and `qrcodes.json`. If the repo is public, players can score without finding the QR codes. | `README.md`, `backend/data/qrcodes.json` | Cheating |
+| 3 | ~~The correct answer is sent to the browser. Players can see it in DevTools.~~ Fixed: `answer` removed from `GET /api/challenge`. | `backend/routes/challenge.js` | — |
+| 4 | ~~A wrong answer shows the same question again, not a new one.~~ Fixed: a wrong answer replaces the round's question with a random unused one. | `backend/routes/challenge.js` | — |
+| 5 | ~~Dashboard "Completed" count is always 0 (`finished` vs `isFinished`).~~ Fixed: frontend reads `isFinished`. | `frontend/script.js` | — |
+| 6 | ~~Organizer dashboard has no password in the frontend. Default passwords are written in the code, README and `.env.example`.~~ Fixed: Organizer View asks for the password and uses `/api/organizer/dashboard`; no default password; login limited to 30 attempts per 15 minutes. | `frontend/script.js`, `backend/routes/organizer.js`, `backend/app.js` | — |
+| 7 | ~~`players.json` with real player names and tokens is committed to git.~~ Fixed: file no longer tracked (`.gitignore`). Old versions remain in git history; they only contain test players. | `backend/data/players.json` | — |
+| 8 | ~~QR secrets are written in the README and `qrcodes.json`.~~ Fixed: secrets moved to the `QR_SECRETS` environment variable and replaced with new ones (the old ones stay visible in git history, so they must not be printed). `QR/` folder no longer tracked. | `backend/db/store.js`, `generate_qr.js`, `README.md` | — |
 | 9 | If `FRONTEND_ORIGIN` is not set, any website can call the backend. | `backend/app.js` line 13 | Security |
 | 10 | ~~README says the game survives a page refresh, but the code does not save the token.~~ Fixed with bug 1. | `frontend/script.js` | — |
 | 12 | ~~Rate limits too low for campus Wi-Fi, where all players can share one public IP (10 registrations and 120 requests per minute for everyone).~~ Fixed: raised to 100 registrations and 2000 requests per minute per IP. | `backend/app.js` | — |

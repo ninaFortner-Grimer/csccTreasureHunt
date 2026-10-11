@@ -187,15 +187,8 @@ restartButton?.addEventListener("click", () => {
     showScreen("welcome");
 });
 
-$("dashboardToggleWelcome")?.addEventListener("click", async () => {
-    showScreen("dashboard");
-    await renderDashboard();
-});
-
-$("dashboardToggleEnd")?.addEventListener("click", async () => {
-    showScreen("dashboard");
-    await renderDashboard();
-});
+$("dashboardToggleWelcome")?.addEventListener("click", openDashboard);
+$("dashboardToggleEnd")?.addEventListener("click", openDashboard);
 
 $("dashboardToggleBack")?.addEventListener("click", () => {
     showScreen("welcome");
@@ -408,7 +401,6 @@ function showManualScanFallback() {
 
 async function handleQrPayload(payload) {
     // QR payload format: CSCC:code:secret
-    // Example: CSCC:QR-01:CSCC-LAB-7K2P
     const parts = payload.trim().split(":");
     if (parts.length >= 3 && parts[0] === "CSCC") {
         const code = parts[1];
@@ -545,7 +537,7 @@ function renderRows(container, players) {
 
         const points = document.createElement("span");
         points.classList.add("player-score");
-        points.textContent = `${player.score} pts${player.finished ? " ✓" : ""}`;
+        points.textContent = `${player.score} pts${player.isFinished ? " ✓" : ""}`;
 
         nameContainer.append(place, name);
         row.append(nameContainer, points);
@@ -565,12 +557,38 @@ async function showLeaderboard() {
 }
 
 // ── Organizer Dashboard ────────────────────────────────────────
+let organizerToken = "";
+
+async function openDashboard() {
+    if (!organizerToken) {
+        const password = window.prompt("Organizer password:");
+        if (password === null) return;
+
+        try {
+            const result = await api("/organizer/login", {
+                method: "POST",
+                body: JSON.stringify({ password })
+            });
+            organizerToken = result.token;
+        } catch (error) {
+            window.alert(error.message);
+            return;
+        }
+    }
+
+    showScreen("dashboard");
+    await renderDashboard();
+}
+
 async function renderDashboard() {
     const container = $("dashboardLeaderboard");
-    if (!container) return;
+    if (!container || !organizerToken) return;
 
     try {
-        const players = await api("/leaderboard");
+        const data = await api("/organizer/dashboard", {
+            headers: { "Authorization": `Bearer ${organizerToken}` }
+        });
+        const players = data.players || [];
         const query = ($("dashboardSearch")?.value || "").trim().toLowerCase();
 
         const filtered = players.filter(p =>
@@ -581,7 +599,7 @@ async function renderDashboard() {
 
         $("dashboardEmpty")?.classList.toggle("hidden", filtered.length > 0);
 
-        const completed = players.filter(p => p.finished).length;
+        const completed = players.filter(p => p.isFinished).length;
 
         if ($("statTotal"))     $("statTotal").textContent     = String(players.length);
         if ($("statCompleted")) $("statCompleted").textContent = String(completed);
@@ -607,7 +625,7 @@ async function renderDashboard() {
 
                     const status = document.createElement("div");
                     status.classList.add("activity-meta");
-                    status.textContent = player.finished
+                    status.textContent = player.isFinished
                         ? `Completed · ${player.score} pts`
                         : `Playing · ${player.score} pts`;
 
@@ -615,7 +633,7 @@ async function renderDashboard() {
 
                     const pts = document.createElement("div");
                     pts.classList.add("player-score");
-                    pts.textContent = player.finished ? "✓ Done" : "In progress";
+                    pts.textContent = player.isFinished ? "✓ Done" : "In progress";
 
                     item.append(details, pts);
                     activity.appendChild(item);
@@ -623,6 +641,12 @@ async function renderDashboard() {
             }
         }
     } catch (error) {
+        // Organizer session lost (e.g. server restarted): ask for the password again
+        if (error.status === 401) {
+            organizerToken = "";
+            container.textContent = "Session expired. Exit and open Organizer View again.";
+            return;
+        }
         container.innerHTML = `<div class="empty-state">${error.message}</div>`;
     }
 }

@@ -1,4 +1,21 @@
-﻿$baseUrl = "http://localhost:3000/api"
+﻿param([string]$baseUrl = "http://localhost:3000/api")
+
+# Private values (QR secrets, organizer password) are read from backend/.env, never hardcoded
+$envVars = @{}
+Get-Content (Join-Path $PSScriptRoot "backend\.env") | ForEach-Object {
+    if ($_ -match '^\s*([A-Z_]+)\s*=\s*"?(.*?)"?\s*$') { $envVars[$matches[1]] = $matches[2] }
+}
+$secretsMap = @{}
+($envVars["QR_SECRETS"] -split ",") | ForEach-Object {
+    $kv = $_ -split "="
+    if ($kv.Count -eq 2) { $secretsMap[$kv[0].Trim()] = $kv[1].Trim() }
+}
+
+# Correct answers come from the question bank (the API no longer sends them)
+$questions = Get-Content (Join-Path $PSScriptRoot "backend\data\questions.json") -Raw | ConvertFrom-Json
+function Get-Answer($questionId) {
+    ($questions | Where-Object { $_.id -eq $questionId }).answer
+}
 
 Write-Host "=== TEST 1: NICKNAME VALIDATION ===" -ForegroundColor Cyan
 try {
@@ -32,7 +49,8 @@ for ($round = 1; $round -le 5; $round++) {
     Write-Host "Target Checkpoint: $cpId - Clue: $clue" -ForegroundColor Gray
 
     # Test submitting wrong answer first
-    $wrongAnswer = if ($chal.options[0] -eq $chal.answer) { $chal.options[1] } else { $chal.options[0] }
+    $correctAnswer = Get-Answer $chal.questionId
+    $wrongAnswer = if ($chal.options[0] -eq $correctAnswer) { $chal.options[1] } else { $chal.options[0] }
     $wrongBody = @{ answer = $wrongAnswer } | ConvertTo-Json
     $wrongResp = Invoke-RestMethod -Uri "$baseUrl/challenge/answer" -Method POST -Headers $headers -Body $wrongBody
     if ($wrongResp.correct -eq $false) {
@@ -41,8 +59,9 @@ for ($round = 1; $round -le 5; $round++) {
         Write-Host "FAIL: Wrong answer accepted!" -ForegroundColor Red
     }
 
-    # Now submit correct answer
-    $rightBody = @{ answer = $chal.answer } | ConvertTo-Json
+    # A wrong answer gives a new question: fetch it, then submit its correct answer
+    $chal = Invoke-RestMethod -Uri "$baseUrl/challenge" -Method GET -Headers $headers
+    $rightBody = @{ answer = (Get-Answer $chal.questionId) } | ConvertTo-Json
     $rightResp = Invoke-RestMethod -Uri "$baseUrl/challenge/answer" -Method POST -Headers $headers -Body $rightBody
     Write-Host "PASS: Correct answer accepted (State: $($rightResp.state))" -ForegroundColor Green
 
@@ -58,15 +77,6 @@ for ($round = 1; $round -le 5; $round++) {
     # Fetch player details to get exact secret for assigned checkpoint
     $pState = Invoke-RestMethod -Uri "$baseUrl/player/me" -Method GET -Headers $headers
     $currentCpId = $pState.assignedCheckpointId
-
-    # Secrets map matching backend qrcodes.json
-    $secretsMap = @{
-        "QR-01" = "CSCC-LAB-7K2P"
-        "QR-02" = "CSCC-ENT-9M4X"
-        "QR-03" = "CSCC-NOT-3W8Y"
-        "QR-04" = "CSCC-TD-5R1Z"
-        "QR-05" = "CSCC-SOC-2L6V"
-    }
 
     $secret = $secretsMap[$currentCpId]
     $validQrPayload = "CSCC:${currentCpId}:${secret}"
@@ -96,7 +106,7 @@ try {
     Write-Host "PASS: Unauthenticated organizer dashboard rejected (StatusCode: $($_.Exception.Response.StatusCode))" -ForegroundColor Green
 }
 
-$orgBody = '{"password": "CSCC_WELCOME_2026_ADMIN"}'
+$orgBody = @{ password = $envVars["ORGANIZER_PASSWORD"] } | ConvertTo-Json
 $orgLogin = Invoke-RestMethod -Uri "$baseUrl/organizer/login" -Method POST -Body $orgBody -ContentType "application/json"
 $orgToken = $orgLogin.token
 Write-Host "PASS: Organizer login successful, token received" -ForegroundColor Green

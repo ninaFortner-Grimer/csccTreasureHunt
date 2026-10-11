@@ -45,7 +45,9 @@ Create a `.env` file inside the `backend` directory (or copy from `backend/.env.
 ```env
 PORT=3000
 FRONTEND_ORIGIN=http://localhost:5500
-ORGANIZER_PASSWORD=CSCC_WELCOME_2026_ADMIN
+ORGANIZER_PASSWORD=choose-a-strong-password
+DATABASE_URL=
+QR_SECRETS=
 ```
 
 ### 4. Start the Backend Server
@@ -83,17 +85,17 @@ Every participant receives a **uniquely randomized set of 5 questions** stored o
 
 | Checkpoint ID | Intended Physical Location | Clue Shown to Participant | Secret Payload |
 |---|---|---|---|
-| **QR-01** | Laboratory Entrance | *"Find me where students wait before entering the laboratory."* | `CSCC:QR-01:CSCC-LAB-7K2P` |
-| **QR-02** | Department Entrance | *"I'm hiding near the department entrance. Can you find me?"* | `CSCC:QR-02:CSCC-ENT-9M4X` |
-| **QR-03** | Notice / Schedule Board | *"Look where schedules and announcements are posted."* | `CSCC:QR-03:CSCC-NOT-3W8Y` |
-| **QR-04** | TD Classrooms | *"You'll find me where students gather to learn and gain knowledge."* | `CSCC:QR-04:CSCC-TD-5R1Z` |
-| **QR-05** | Student Clubs Area | *"You'll find me where students learn new things, explore their interests, and have fun doing what they love."* | `CSCC:QR-05:CSCC-SOC-2L6V` |
+| **QR-01** | Laboratory Entrance | *"Find me where students wait before entering the laboratory."* |
+| **QR-02** | Department Entrance | *"I'm hiding near the department entrance. Can you find me?"* |
+| **QR-03** | Notice / Schedule Board | *"Look where schedules and announcements are posted."* |
+| **QR-04** | TD Classrooms | *"You'll find me where students gather to learn and gain knowledge."* |
+| **QR-05** | Student Clubs Area | *"You'll find me where students learn new things, explore their interests, and have fun doing what they love."* |
 
 ---
 
 ## 🖨️ Printing & Setting Up QR Codes
 
-1. Run `node generate_qr.js`.
+1. Run `node generate_qr.js`. The first run creates secret codes and saves them in `backend/.env` (`QR_SECRETS`). The same `QR_SECRETS` value must be set on the backend host. The `QR/` folder contains the secrets and is not committed to git.
 2. Open `QR/print_sheet.html` in your browser.
 3. Print the document (`Ctrl+P` / `Cmd+P`) on standard A4 paper.
 4. Cut out each card along the borders.
@@ -107,7 +109,7 @@ Every participant receives a **uniquely randomized set of 5 questions** stored o
 Organizers can view live event statistics, active players, and final rankings.
 
 - **URL**: Click **Organizer Access** on the footer of `index.html` or navigate directly.
-- **Default Password**: `CSCC_WELCOME_2026_ADMIN` (Configurable via `ORGANIZER_PASSWORD` in `.env`).
+- **Password**: set with `ORGANIZER_PASSWORD` in `.env` (and in the hosting settings). There is no default password; without it, organizer login is disabled.
 - **Capabilities**: View total participants, players currently active, completed games, and detailed scores.
 
 ---

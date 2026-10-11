@@ -83,11 +83,11 @@ csccTreasureHunt/
 │   ├── db/store.js           Reads and writes the JSON data files
 │   ├── data/                 The "database" (plain JSON files)
 │   │   ├── questions.json    Question bank
-│   │   ├── qrcodes.json      The 5 checkpoints, their secrets and clues
+│   │   ├── qrcodes.json      The 5 checkpoints and their clues (secrets are in QR_SECRETS)
 │   │   └── players.json      Players (only used when no database is configured)
 │   ├── .env.example          Template for settings (copy it to .env)
 │   └── package.json          Backend dependencies and start commands
-├── QR/                       Generated QR images + printable sheet
+├── QR/                       Generated QR images + printable sheet (not in git: contains secrets)
 ├── generate_qr.js            Script that creates the QR images
 ├── run_tests.ps1             Automatic API test (PowerShell)
 └── docs/                     Project documentation (this file + bug log)
@@ -202,6 +202,7 @@ Settings live in `backend/.env` (never committed to git).
 | `FRONTEND_ORIGIN` | `http://localhost:5500` | Website address allowed to call the backend (CORS). |
 | `ORGANIZER_PASSWORD` | (secret) | Password for the organizer login. |
 | `DATABASE_URL` | (secret) `postgresql://...` | Neon connection string. If empty, players are saved in `players.json`. |
+| `QR_SECRETS` | (secret) `QR-01=CSCC-XXXX,...` | Secret part of each QR code. Created by `node generate_qr.js`. Must be identical locally and on Render. |
 
 ---
 
@@ -223,7 +224,7 @@ Settings live in `backend/.env` (never committed to git).
 | Start Command | `npm start` |
 | Instance Type | Free |
 
-4. Environment variables: `ORGANIZER_PASSWORD` and `DATABASE_URL` (Neon connection string). Do not set `PORT`.
+4. Environment variables: `ORGANIZER_PASSWORD`, `DATABASE_URL` (Neon connection string), `QR_SECRETS`, and `FRONTEND_ORIGIN` (the Vercel URL). Do not set `PORT`.
 5. Click **Deploy Web Service**, wait for status **Live**.
 6. Check: open `https://<service>.onrender.com/api/health`, expected `{"status":"ok", ...}`.
 
@@ -245,6 +246,55 @@ on every restart or deploy. This is why players are stored in Neon, not in `play
 4. The backend creates the `players` table by itself on startup.
    The startup log shows `Loaded N players from the database`.
 
-### Frontend
+**How the backend uses the database:** it reads all players once at startup and keeps them
+in memory. Every change is written to the database right away.
+Consequences:
+- To delete players (for example test players before the event), delete the rows in Neon
+  (**Tables > players**, or SQL `DELETE FROM players;` for all), then restart the backend
+  (Render: **Manual Deploy > Restart service**). Without the restart, the deleted players stay
+  visible, and if they play again they are written back.
+- Only **one** backend may use the event database at a time. A local backend connected to the
+  same database does not see players created on Render, and the other way round.
+  For local testing, leave `DATABASE_URL` empty or use a separate Neon branch.
 
-Not done yet.
+### Frontend on Vercel (free plan)
+
+The frontend is deployed from a computer with the Vercel command-line tool
+(Vercel is not connected to the GitHub repository).
+
+`frontend/vercel.json` tells Vercel to write `config.js` at build time from the
+`CSCC_API_BASE` environment variable, and to serve the files of the `frontend` folder.
+
+First time:
+```
+cd frontend
+npx vercel login
+npx vercel                                   (create the project, answer "no" to connecting Git)
+npx vercel env add CSCC_API_BASE production  (type: Config, value: the Render URL, no slash at the end)
+npx vercel --prod
+```
+
+Every update of the frontend afterwards:
+```
+cd frontend
+npx vercel --prod
+```
+
+Then, on Render, set `FRONTEND_ORIGIN` to the Vercel URL (for example `https://cscc-treasure-hunt.vercel.app`).
+Players use only that short URL; the long per-deployment URLs require a Vercel login.
+
+### QR codes
+
+1. From the project root: `npm install` (first time), then `node generate_qr.js`.
+2. The first run creates new secrets and saves them in `backend/.env` as `QR_SECRETS`.
+   Later runs reuse them.
+3. Copy the same `QR_SECRETS` value into the Render **Environment** tab, then deploy.
+4. Print `QR/print_sheet.html`. The `QR/` folder is not in git because it contains the secrets.
+   Share it privately with the organizers.
+
+### Before the event
+
+1. Delete test players: Neon **SQL Editor**, `DELETE FROM players;`, then Render **Manual Deploy > Restart service**.
+2. Wake the backend 30 minutes before the start (open `/api/health`), or set up a free uptime monitor
+   that opens `/api/health` every 5 minutes.
+3. Test one full game on a phone with the printed QR codes.

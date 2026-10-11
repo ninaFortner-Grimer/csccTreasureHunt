@@ -44,7 +44,6 @@ router.get('/', auth, (req, res) => {
     text: q.text,
     choices: shuffledChoices,
     options: shuffledChoices,
-    answer: q.answer, // Note: answer included for dev/test verification if needed or omit for prod security
     category: q.category,
     score: player.score,
     round: player.currentRoundIndex + 1,
@@ -93,10 +92,26 @@ router.post('/answer', auth, (req, res) => {
     });
   }
 
-  // Incorrect answer — keep player in 'waiting_answer' state to retry
+  // Incorrect answer — swap in a different random question for this round
+  const usedIds = player.usedQuestionIds || [];
+  usedIds.push(questionId);
+  player.usedQuestionIds = usedIds;
+
+  const excluded = new Set([...player.assignedQuestionIds, ...usedIds]);
+  let candidates = store.getQuestions().filter((item) => !excluded.has(item.id));
+  if (candidates.length === 0) {
+    // Question bank exhausted: allow repeats, but never the same question twice in a row
+    candidates = store.getQuestions().filter((item) => item.id !== questionId);
+  }
+  if (candidates.length > 0) {
+    const next = candidates[Math.floor(Math.random() * candidates.length)];
+    player.assignedQuestionIds[player.currentRoundIndex] = next.id;
+  }
+  store.save(player);
+
   return res.json({
     correct: false,
-    message: 'Incorrect answer. Try again!',
+    message: 'Incorrect answer. Here is a new question!',
     state: 'waiting_answer',
   });
 });
