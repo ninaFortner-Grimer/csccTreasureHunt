@@ -204,4 +204,32 @@ Settings live in `backend/.env` (never committed to git).
 
 ## 7. Deployment
 
-Not done yet. This section will be completed when the game works locally.
+### Backend on Render (free plan)
+
+1. Create an account on https://render.com.
+2. **+ New > Web Service**, tab **Public Git Repository**, paste
+   `https://github.com/ninaFortner-Grimer/csccTreasureHunt`, click **Connect**.
+3. Settings:
+
+| Field | Value |
+|---|---|
+| Language | Node |
+| Branch | branch to deploy |
+| Root Directory | `backend` (required, the deploy fails without it) |
+| Build Command | `npm install` |
+| Start Command | `npm start` |
+| Instance Type | Free |
+
+4. Environment variables: `ORGANIZER_PASSWORD`. Do not set `PORT`.
+5. Click **Deploy Web Service**, wait for status **Live**.
+6. Check: open `https://<service>.onrender.com/api/health`, expected `{"status":"ok", ...}`.
+
+With **Auto-Deploy: On Commit**, Render redeploys every time the branch is pushed.
+
+Free plan limits: the service sleeps after 15 minutes without requests
+(first request then takes up to 1 minute), and files written by the server
+(like `players.json`) are erased on every restart or deploy.
+
+### Frontend
+
+Not done yet.

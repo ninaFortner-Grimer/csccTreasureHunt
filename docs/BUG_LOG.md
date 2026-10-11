@@ -54,7 +54,7 @@ Using `npx serve` (see `PROJECT_GUIDE.md`) is still recommended.
 
 ## Bug 2 — `GET /api/health` on Render returns `{"error":"Not found"}`
 
-**Status:** Open (need Render settings to confirm)
+**Status:** Code OK (tested on a new Render service). The original service needs its settings checked.
 
 **What users see:** Opening `https://<render-app>.onrender.com/api/health` shows `{"error":"Not found"}`.
 
@@ -64,7 +64,31 @@ Using `npx serve` (see `PROJECT_GUIDE.md`) is still recommended.
 - The `/api/health` route exists (`backend/app.js`, line 59).
 - So either the URL typed was different from `/api/health`, or Render is running an older commit.
 
-**Fix:** To be decided after checking the Render settings and deploy log.
+**Test done:** A new Render service was created from branch `fix/player-flow-houcine`
+with the settings below. `GET /api/health` returned:
+```
+{"status":"ok","timestamp":"2026-10-11T16:05:10.499Z"}
+```
+So the backend code is correct. The problem is in the settings of the original Render service
+or in the URL that was typed.
+
+**Mistake found during the test:** with **Root Directory** left empty, Render runs commands in the
+top folder of the repo and the deploy fails with `npm error Missing script: "start"`.
+
+**Correct Render settings:**
+
+| Setting | Value |
+|---|---|
+| Branch | the branch to deploy (for example `main`) |
+| Root Directory | `backend` |
+| Build Command | `npm install` |
+| Start Command | `npm start` |
+| Instance Type | Free |
+| Environment variable | `ORGANIZER_PASSWORD` (do not set `PORT`, Render sets it) |
+
+**Fix for the original service:** the owner opens the service on Render, checks the settings above,
+checks that the latest deploy in **Events** uses a recent commit, then calls exactly
+`https://<service>.onrender.com/api/health`.
 
 ---
 
