@@ -14,9 +14,11 @@ const TOTAL = 5; // total QR checkpoints
 let playerName = "";
 let token = "";
 let score = 0;
+let roundsDone = 0; // checkpoints found (score can be lower because of penalties)
 let currentQuestion = null;
 let busy = false;
 let qrScanner = null;
+let freezeTimer = null;
 
 // ── DOM Helpers ────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -174,10 +176,12 @@ nextButton?.addEventListener("click", async event => {
 
 restartButton?.addEventListener("click", () => {
     stopQrScanner();
+    stopFreeze();
     clearToken();
     token = "";
     playerName = "";
     score = 0;
+    roundsDone = 0;
     currentQuestion = null;
 
     if (playerNameInput) playerNameInput.value = "";
@@ -229,6 +233,7 @@ async function startGame() {
         token = player.token;
         saveToken(token);
         score = 0;
+        roundsDone = 0;
 
         if (displayName) displayName.textContent = playerName;
         if (scoreDisplay) scoreDisplay.textContent = "0";
@@ -256,12 +261,18 @@ async function loadQuestion() {
 
         if (data.finished) {
             score = Number(data.score ?? score);
+            roundsDone = TOTAL;
             updateProgress();
             await endGame();
             return;
         }
 
+        score = Number(data.score ?? score);
+        roundsDone = Math.max(0, Number(data.round || 1) - 1);
+        updateProgress();
+
         if (data.state === "waiting_scan") {
+            if (questionElement) questionElement.textContent = "Challenge solved!";
             message(feedback, "You already answered correctly! Find your checkpoint.", "");
             message(clueText, data.clue || "Find your assigned checkpoint.");
             clueCard?.classList.remove("hidden");
@@ -269,21 +280,48 @@ async function loadQuestion() {
             return;
         }
 
-        currentQuestion = data;
-
-        if (questionNumber) {
-            questionNumber.textContent = `${Math.min(score + 1, TOTAL)} / ${TOTAL}`;
+        if (data.state === "frozen") {
+            startFreeze(Number(data.waitSeconds || 30));
+            return;
         }
+
+        currentQuestion = data;
 
         if (questionElement) questionElement.textContent = data.text;
 
-        updateProgress();
         createAnswerButtons(data.choices || []);
     } catch (error) {
         console.error("[CSCC] loadQuestion error:", error.message);
         message(feedback, error.message, "#f87171");
     } finally {
         setBusy(false);
+    }
+}
+
+// ── Wrong Answer Freeze ────────────────────────────────────────
+// The server refuses answers during the freeze; this only shows the countdown
+function startFreeze(seconds) {
+    stopFreeze();
+    if (answers) answers.innerHTML = "";
+
+    let left = Math.max(1, seconds);
+    const tick = () => {
+        if (questionElement) questionElement.textContent = `⏳ Next question in ${left}s`;
+        left -= 1;
+        if (left < 0) {
+            stopFreeze();
+            loadQuestion();
+        }
+    };
+
+    tick();
+    freezeTimer = window.setInterval(tick, 1000);
+}
+
+function stopFreeze() {
+    if (freezeTimer) {
+        window.clearInterval(freezeTimer);
+        freezeTimer = null;
     }
 }
 
@@ -321,12 +359,24 @@ async function checkAnswer(answer, button) {
             clueCard?.classList.remove("hidden");
         } else {
             button.classList.add("wrong");
-            message(feedback, "✗ Incorrect. You'll get a new question.", "#f87171");
+
+            // Wrong answer costs 1 point (never below 0)
+            const lostPoint = Number(result.score ?? score) < score;
+            score = Number(result.score ?? score);
+            updateProgress();
+
+            message(
+                feedback,
+                lostPoint
+                    ? "✗ Incorrect. -1 point. Wait for a new question."
+                    : "✗ Incorrect. Wait for a new question.",
+                "#f87171"
+            );
             currentQuestion = null;
 
-            window.setTimeout(() => {
-                loadQuestion();
-            }, 1200);
+            // Show the wrong answer briefly, then the countdown
+            const waitSeconds = Number(result.waitSeconds || 30);
+            window.setTimeout(() => startFreeze(waitSeconds - 1), 1000);
         }
     } catch (error) {
         console.error("[CSCC] checkAnswer error:", error.message);
@@ -408,7 +458,14 @@ async function handleQrPayload(payload) {
         await submitQrScan(code, secret);
     } else {
         message(qrFeedback, "Invalid QR code. Please scan the correct checkpoint.", "#f87171");
+        allowRescan();
     }
+}
+
+// After a failed scan the camera is off: show the clue card again
+// so its "I FOUND THE QR CODE" button can restart the camera
+function allowRescan() {
+    clueCard?.classList.remove("hidden");
 }
 
 function scanCheckpointManual() {
@@ -437,6 +494,7 @@ async function submitQrScan(code, secret) {
         });
 
         score = Number(result.score ?? score);
+        roundsDone = result.finished ? TOTAL : roundsDone + 1;
         updateProgress();
 
         const msg = result.finished
@@ -457,6 +515,7 @@ async function submitQrScan(code, secret) {
     } catch (error) {
         console.error("[CSCC] QR scan error:", error.message);
         message(qrFeedback, error.message, "#f87171");
+        allowRescan();
     } finally {
         setBusy(false);
     }
@@ -482,11 +541,11 @@ function updateProgress() {
     if (scoreDisplay) scoreDisplay.textContent = String(score);
 
     if (progressBar) {
-        progressBar.style.width = `${Math.min((score / TOTAL) * 100, 100)}%`;
+        progressBar.style.width = `${Math.min((roundsDone / TOTAL) * 100, 100)}%`;
     }
 
     if (questionNumber) {
-        questionNumber.textContent = `${Math.min(score + 1, TOTAL)} / ${TOTAL}`;
+        questionNumber.textContent = `${Math.min(roundsDone + 1, TOTAL)} / ${TOTAL}`;
     }
 }
 
@@ -502,8 +561,8 @@ async function endGame() {
     if (finalMessage) {
         finalMessage.textContent =
             score >= TOTAL
-                ? `Outstanding! You found all ${TOTAL} checkpoints!`
-                : `You completed the hunt with ${score} out of ${TOTAL} checkpoints.`;
+                ? `Outstanding! You found all ${TOTAL} checkpoints with a perfect score!`
+                : `You found all ${TOTAL} checkpoints and scored ${score} out of ${TOTAL} points.`;
     }
 
     await showLeaderboard();
@@ -661,6 +720,7 @@ async function resumeSession() {
 
         playerName = player.name;
         score = Number(player.score || 0);
+        roundsDone = Number(player.currentRoundIndex || 0);
 
         if (displayName) displayName.textContent = playerName;
         updateProgress();

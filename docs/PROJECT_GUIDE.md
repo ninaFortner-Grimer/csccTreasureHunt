@@ -11,9 +11,14 @@ It is written for team members who are new to web development.
 2. The player types a nickname and clicks **BEGIN THE HUNT**.
 3. The player answers a multiple-choice question (QCM).
    - Correct answer: the player gets a clue that points to a hidden QR code.
-   - Wrong answer: the player gets another question.
+   - Wrong answer: the player loses 1 point (the score never goes below 0), waits 30 seconds,
+     then gets a new random question for the same checkpoint. The wait is enforced by the server
+     (reloading the page does not skip it).
 4. The player finds the QR code, scans it with the phone camera, and earns 1 point.
+   - Wrong or unknown QR code: an error is shown and the player can scan again.
 5. Steps 3 and 4 repeat until the player has found all 5 QR checkpoints.
+   Each player gets 5 random questions and visits the 5 checkpoints in their own random order.
+   Maximum score: 5.
 6. The end screen shows the final score and the leaderboard.
 7. Organizers can open the **Organizer View** to see all players and their scores.
 

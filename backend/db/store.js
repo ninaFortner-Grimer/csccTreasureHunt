@@ -128,7 +128,8 @@ function createPlayer(name) {
   const shuffledQuestions = shuffle(questions);
   const selectedQuestions = shuffledQuestions.slice(0, 5).map((q) => q.id);
 
-  const checkpointIds = qrCodes.map((qr) => qr.id);
+  // Each player visits all checkpoints in their own random order
+  const checkpointIds = shuffle(qrCodes.map((qr) => qr.id));
 
   const player = {
     id: crypto.randomUUID(),

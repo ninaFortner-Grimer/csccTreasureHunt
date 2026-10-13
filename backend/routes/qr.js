@@ -36,7 +36,8 @@ router.post('/scan', auth, (req, res) => {
 
   const expectedCpId = player.assignedCheckpointIds[player.currentRoundIndex];
   if (code !== expectedCpId) {
-    return res.status(400).json({ error: `Wrong checkpoint! You need to scan ${expectedCpId}.` });
+    // Do not reveal the expected checkpoint: the player must solve the clue
+    return res.status(400).json({ error: 'Wrong checkpoint! Read your clue again.' });
   }
 
   const qr = store.getQrById(code);

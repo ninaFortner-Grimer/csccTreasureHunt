@@ -4,6 +4,14 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
+// After a wrong answer the player must wait before getting a new question
+const FREEZE_MS = 30 * 1000;
+
+function freezeSecondsLeft(player) {
+  const ms = (player.frozenUntil || 0) - Date.now();
+  return ms > 0 ? Math.ceil(ms / 1000) : 0;
+}
+
 router.get('/', auth, (req, res) => {
   const player = req.player;
 
@@ -22,6 +30,18 @@ router.get('/', auth, (req, res) => {
       state: 'waiting_scan',
       clue: cp ? cp.clue : 'Find your assigned checkpoint.',
       checkpoint: cp ? { id: cp.id, clue: cp.clue } : null,
+      score: player.score,
+      round: player.currentRoundIndex + 1,
+      totalRounds: 5,
+    });
+  }
+
+  // Frozen after a wrong answer: no question until the wait is over
+  const waitSeconds = freezeSecondsLeft(player);
+  if (waitSeconds > 0) {
+    return res.json({
+      state: 'frozen',
+      waitSeconds,
       score: player.score,
       round: player.currentRoundIndex + 1,
       totalRounds: 5,
@@ -63,6 +83,11 @@ router.post('/answer', auth, (req, res) => {
     return res.status(400).json({ error: 'Not currently waiting for an answer' });
   }
 
+  const waitSeconds = freezeSecondsLeft(player);
+  if (waitSeconds > 0) {
+    return res.status(429).json({ error: `Please wait ${waitSeconds} seconds.`, waitSeconds });
+  }
+
   const rawAnswer = (req.body.answer || '').toString().trim();
   if (!rawAnswer) {
     return res.status(400).json({ error: 'Answer is required' });
@@ -92,7 +117,11 @@ router.post('/answer', auth, (req, res) => {
     });
   }
 
-  // Incorrect answer — swap in a different random question for this round
+  // Incorrect answer — lose 1 point (never below 0) and wait before the next question
+  player.score = Math.max(0, player.score - 1);
+  player.frozenUntil = Date.now() + FREEZE_MS;
+
+  // ...and swap in a different random question for this round
   const usedIds = player.usedQuestionIds || [];
   usedIds.push(questionId);
   player.usedQuestionIds = usedIds;
@@ -113,6 +142,8 @@ router.post('/answer', auth, (req, res) => {
     correct: false,
     message: 'Incorrect answer. Here is a new question!',
     state: 'waiting_answer',
+    score: player.score,
+    waitSeconds: FREEZE_MS / 1000,
   });
 });
 

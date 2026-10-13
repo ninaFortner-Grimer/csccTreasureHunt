@@ -59,8 +59,10 @@ for ($round = 1; $round -le 5; $round++) {
         Write-Host "FAIL: Wrong answer accepted!" -ForegroundColor Red
     }
 
-    # A wrong answer gives a new question: fetch it, then submit its correct answer
-    $chal = Invoke-RestMethod -Uri "$baseUrl/challenge" -Method GET -Headers $headers
+    # A wrong answer freezes the player for 30 seconds, then gives a new question
+    Write-Host "Waiting 31 seconds (wrong answer freeze)..." -ForegroundColor Gray
+    Start-Sleep -Seconds 31
+    $chal =Invoke-RestMethod -Uri "$baseUrl/challenge" -Method GET -Headers $headers
     $rightBody = @{ answer = (Get-Answer $chal.questionId) } | ConvertTo-Json
     $rightResp = Invoke-RestMethod -Uri "$baseUrl/challenge/answer" -Method POST -Headers $headers -Body $rightBody
     Write-Host "PASS: Correct answer accepted (State: $($rightResp.state))" -ForegroundColor Green
